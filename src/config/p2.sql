@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Apr 01, 2025 at 12:32 AM
+-- Generation Time: Apr 03, 2025 at 04:42 PM
 -- Server version: 8.0.30
 -- PHP Version: 8.3.1
 
@@ -57,8 +57,8 @@ CREATE TABLE `joueur` (
 
 CREATE TABLE `word` (
   `id` int NOT NULL,
-  `word` int NOT NULL,
-  `lang` int NOT NULL
+  `word` varchar(50) NOT NULL,
+  `lang` varchar(10) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- --------------------------------------------------------

@@ -12,11 +12,11 @@ Word.init(
       primaryKey: true,
     },
     word: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.STRING(50),
       allowNull: false,
     },
     lang: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.STRING(10),
       allowNull: false,
     },
   },

@@ -3,35 +3,33 @@ const sequelize = require("../config/database");
 
 class Definition extends Model {}
 
-class definition extends Sequelize.Model {
-  static init(sequelize, DataTypes) {
-  return super.init({
+Definition.init(
+  {
     id: {
       autoIncrement: true,
       type: DataTypes.INTEGER,
       allowNull: false,
-      primaryKey: true
+      primaryKey: true,
     },
     definition: {
       type: DataTypes.TEXT,
-      allowNull: false
-    }
-  }, {
+      allowNull: false,
+    },
+  },
+  {
     sequelize,
-    tableName: 'definition',
+    tableName: "definition",
     timestamps: false,
+    modelName: "Definition",
     indexes: [
       {
         name: "PRIMARY",
         unique: true,
         using: "BTREE",
-        fields: [
-          { name: "id" },
-        ]
+        fields: ["id"],
       },
-    ]
-  });
+    ],
   }
-}
+);
 
 module.exports = Definition;
