@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Documentation API REST</title>
+  <style>
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        margin: 0;
+        padding: 2rem;
+        background-color: #f4f4f4;
+    }
+    h1 {
+        text-align: center;
+        margin-bottom: -1rem;
+    }
+    h3 {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+    .command {
+        background-color: white;
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+        border-radius: 8px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    .command h2 {
+        margin-top: 0;
+    }
+        .method {
+        font-weight: bold;
+        display: inline-block;
+        padding: 0.2rem 0.5rem;
+        border-radius: 4px;
+        color: white;
+        font-size: 0.9rem;
+        margin-right: 0.5rem;
+    }
+        .GET { background-color: #4CAF50; }
+        .POST { background-color: #2196F3; }
+        .PUT { background-color: #FF9800; }
+        .DELETE { background-color: #f44336; }
+    code {
+        background-color: #eee;
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-size: 0.95rem;
+    }
+    .navbar {
+        display: flex;
+        justify-content: center;
+        gap: 2rem;
+        background-color: #ffffff;
+        padding: 1rem;
+        border-radius: 8px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        margin-bottom: 2rem;
+    }
+    .navbar a {
+        text-decoration: none;
+        color: #333;
+        font-weight: bold;
+    }
+    .navbar a:hover {
+        color: #2196F3;
+    }
+    .section-title {
+        margin-top: 3rem;
+        margin-bottom: 1rem;
+        font-size: 1.5rem;
+        color: #444;
+        border-bottom: 2px solid #ddd;
+        padding-bottom: 0.5rem;
+      }
+  </style>
+</head>
+<body>
+  <h1>📘 Documentation API REST</h1>
+  <h3>Yanis Boulogne | Karl-Antoine Plouffe</h3>
+  <nav class="navbar">
+    <a href="#user">Joueur</a>
+    <a href="#word">Mot</a>
+    <a href="#game">Jeu</a>
+    <a href="#admin">Admin</a>
+  </nav>
+
+  <h2 class="section-title" id="user">Joueur</h2>
+
+  <div class="command">
+    <h2><span class="method GET">GET</span> &lt;path&gt;#/gamers/all</h2>
+    <p>Récupère la liste de tous les joueurs enregistrés dans la base de données.</p>
+  </div>
+
+  <h2 class="section-title" id="word">Mot</h2>
+  <h2 class="section-title" id="game">Jeu</h2>
+  <h2 class="section-title" id="admin">Admin</h2>
+  <div class="command">
+    <h2><span class="method GET">GET</span> /api/users</h2>
+    <p>Récupère la liste de tous les utilisateurs.</p>
+  </div>
+
+  <div class="command">
+    <h2><span class="method POST">POST</span> /api/users</h2>
+    <p>Crée un nouvel utilisateur à partir des données envoyées en JSON.</p>
+    <p><strong>Exemple de body :</strong></p>
+    <pre><code>{
+  "name": "Jean Dupont",
+  "email": "jean@example.com"
+}</code></pre>
+  </div>
+
+  <div class="command">
+    <h2><span class="method PUT">PUT</span> /api/users/:id</h2>
+    <p>Met à jour les infos d'un utilisateur existant.</p>
+  </div>
+
+  <div class="command">
+    <h2><span class="method DELETE">DELETE</span> /api/users/:id</h2>
+    <p>Supprime un utilisateur spécifique.</p>
+  </div>
+
+</body>
+</html>

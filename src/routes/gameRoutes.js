@@ -17,7 +17,7 @@ router.get("/play/:pseudo", async (req, res) => {
     }
 });
 
-router.get("/win/:pseudo", async (req, res) => {
+router.put("/win/:pseudo", async (req, res) => {
     try {
         const joueur = await Joueur.findOne({ where: { pseudo: req.params.pseudo }});
 
@@ -29,7 +29,7 @@ router.get("/win/:pseudo", async (req, res) => {
     }
 });
 
-router.get("/score/:pseudo/:pts", async (req, res) => {
+router.put("/score/:pseudo/:pts", async (req, res) => {
     try {
         const { pseudo, pts } = req.params;
 

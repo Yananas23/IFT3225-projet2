@@ -35,7 +35,7 @@ async function handleTopRequest(req, res) {
     }
 };
 
-router.get("/delete/joueur/:joueur", async (req, res) => {
+router.delete("/delete/joueur/:joueur", async (req, res) => {
     try {
         const deleted = await Joueur.destroy({ where: { pseudo: req.params.joueur } });
 
@@ -49,7 +49,7 @@ router.get("/delete/joueur/:joueur", async (req, res) => {
     }
 });
 
-router.get("/delete/def/:id", async (req, res) => {
+router.delete("/delete/def/:id", async (req, res) => {
     try {
         const deleted = await Definition.destroy({ where: { id: req.params.id } });
 
