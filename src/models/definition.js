@@ -15,6 +15,10 @@ Definition.init(
       type: DataTypes.TEXT,
       allowNull: false,
     },
+    source: {
+      type: DataTypes.STRING(50),
+      allowNull: true,
+    },
   },
   {
     sequelize,

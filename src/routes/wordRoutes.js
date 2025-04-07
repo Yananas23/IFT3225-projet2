@@ -29,7 +29,7 @@ router.get("/add", async (req, res) => {
                     for (let line of lines) {
                         if (!line.trim()) continue; // Ignorer les lignes vides
 
-                        let [lang, provenance, word, ...descriptionArray] = line.trim().split(/\s+/);
+                        let [lang, source, word, ...descriptionArray] = line.trim().split(/\s+/);
                         let definition = descriptionArray.join(" ");
 
                         if (!word || !definition) {
@@ -39,7 +39,7 @@ router.get("/add", async (req, res) => {
 
                         let [wordEntry] = await Word.findOrCreate({ where: { word, lang } });
                         
-                        let [definitionEntry] = await Definition.findOrCreate({ where: { definition }  });
+                        let [definitionEntry] = await Definition.findOrCreate({ where: { definition, source }  });
 
                         await WordDefinition.findOrCreate({
                             where: { 'w-id': wordEntry.id, 'd-id': definitionEntry.id },
