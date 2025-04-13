@@ -93,32 +93,97 @@
     <p>Récupère la liste de tous les joueurs enregistrés dans la base de données.</p>
   </div>
 
+  <div class="command">
+    <h2><span class="method GET">GET</span> &lt;path&gt;#/gamers/:joueur</h2>
+    <p>Récupère les informations d'un joueur spécifique par son pseudo.</p>
+  </div>
+
+  <div class="command">
+    <h2><span class="method POST">POST</span> &lt;path&gt;#/gamers/add/:pseudo/:pwd</h2>
+    <p>Crée un nouveau joueur avec le pseudo et mot de passe fournis.</p>
+    <p>Le mot de passe sera chiffré avant d'être stocké.</p>
+  </div>
+
+  <div class="command">
+    <h2><span class="method GET">GET</span> &lt;path&gt;#/gamers/login/:pseudo/:pwd</h2>
+    <p>Permet la connexion d'un joueur avec vérification du mot de passe.</p>
+  </div>
+
+  <div class="command">
+    <h2><span class="method GET">GET</span> &lt;path&gt;#/gamers/logout/:pseudo/:pwd</h2>
+    <p>Déconnecte un joueur et met à jour sa date de dernière connexion.</p>
+  </div>
+
   <h2 class="section-title" id="word">Mot</h2>
+
+  <div class="command">
+    <h2><span class="method GET">GET</span> &lt;path&gt;#/word</h2>
+    <p>Récupère les 10 premiers mots à partir de l'ID 1 avec leurs définitions.</p>
+  </div>
+  
+  <div class="command">
+    <h2><span class="method GET">GET</span> &lt;path&gt;#/word/:nb</h2>
+    <p>Récupère un nombre spécifique de mots à partir de l'ID 1 avec leurs définitions.</p>
+  </div>
+  
+  <div class="command">
+    <h2><span class="method GET">GET</span> &lt;path&gt;#/word/:nb/:from</h2>
+    <p>Récupère un nombre spécifique de mots à partir d'un ID donné avec leurs définitions.</p>
+  </div>
+  
+  <div class="command">
+    <h2><span class="method GET">GET</span> &lt;path&gt;#/word/add?lien=[url]</h2>
+    <p>Importe des mots et définitions à partir d'un fichier en ligne.</p>
+    <p>Le fichier doit contenir une ligne par mot avec le format: langue source mot définition.</p>
+  </div>
+
   <h2 class="section-title" id="game">Jeu</h2>
+
+  <div class="command">
+    <h2><span class="method GET">GET</span> &lt;path&gt;#/game/play/:pseudo</h2>
+    <p>Incrémente le compteur de parties jouées pour un joueur spécifique.</p>
+  </div>
+
+  <div class="command">
+    <h2><span class="method PUT">PUT</span> &lt;path&gt;#/game/win/:pseudo</h2>
+    <p>Incrémente le compteur de victoires pour un joueur spécifique.</p>
+  </div>
+
+  <div class="command">
+    <h2><span class="method PUT">PUT</span> &lt;path&gt;#/game/score/:pseudo/:pts</h2>
+    <p>Ajoute des points au score d'un joueur spécifique.</p>
+  </div>
+
   <h2 class="section-title" id="admin">Admin</h2>
+
   <div class="command">
-    <h2><span class="method GET">GET</span> /api/users</h2>
-    <p>Récupère la liste de tous les utilisateurs.</p>
+    <h2><span class="method GET">GET</span> &lt;path&gt;#/admin/top</h2>
+    <p>Récupère les 10 meilleurs joueurs classés par score.</p>
   </div>
 
   <div class="command">
-    <h2><span class="method POST">POST</span> /api/users</h2>
-    <p>Crée un nouvel utilisateur à partir des données envoyées en JSON.</p>
-    <p><strong>Exemple de body :</strong></p>
-    <pre><code>{
-  "name": "Jean Dupont",
-  "email": "jean@example.com"
-}</code></pre>
+    <h2><span class="method GET">GET</span> &lt;path&gt;#/admin/top/:nb</h2>
+    <p>Récupère les N meilleurs joueurs classés par score.</p>
   </div>
 
   <div class="command">
-    <h2><span class="method PUT">PUT</span> /api/users/:id</h2>
-    <p>Met à jour les infos d'un utilisateur existant.</p>
+    <h2><span class="method DELETE">DELETE</span> &lt;path&gt;#/admin/delete/joueur/:joueur</h2>
+    <p>Supprime un joueur spécifique de la base de données.</p>
   </div>
 
   <div class="command">
-    <h2><span class="method DELETE">DELETE</span> /api/users/:id</h2>
-    <p>Supprime un utilisateur spécifique.</p>
+    <h2><span class="method DELETE">DELETE</span> &lt;path&gt;#/admin/delete/def/:id</h2>
+    <p>Supprime une définition spécifique par son ID.</p>
+  </div>
+
+  <div class="command">
+    <h2><span class="method POST">POST</span> &lt;path&gt;#/admin/add/:word/:lang</h2>
+    <p>Ajoute un nouveau mot dans la langue spécifiée.</p>
+  </div>
+
+  <div class="command">
+    <h2><span class="method POST">POST</span> &lt;path&gt;#/admin/add/:word/:lang/:def</h2>
+    <p>Ajoute une définition à un mot existant.</p>
   </div>
 
 </body>
