@@ -1,5 +1,7 @@
 const { Sequelize } = require("sequelize");
 require("dotenv").config();
+const GSSAPIAuthPlugin = require('./gssapi-auth-plugin');
+
 
 const sequelize = new Sequelize(
   process.env.DB_NAME,     
@@ -8,7 +10,24 @@ const sequelize = new Sequelize(
   {
     host: process.env.DB_HOST, 
     dialect: "mysql",
-    logging: false, 
+    logging: false,
+    dialectOptions: {
+      authPlugins: {
+        'auth_gssapi_client': () => new GSSAPIAuthPlugin()
+      },
+      authSwitchHandler: function(data, cb) {
+        if (data.pluginName === 'auth_gssapi_client') {
+          const plugin = new GSSAPIAuthPlugin();
+          plugin.authenticate({
+            pluginData: data.pluginData,
+            connection: this,
+            hostname: process.env.DB_HOST
+          }, cb);
+        } else {
+          return cb(new Error(`Méthode d'authentification non supportée: ${data.pluginName}`));
+        }
+      }
+    }
   }
 );
 

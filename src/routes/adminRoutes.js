@@ -6,6 +6,14 @@ const Definition = require("../models/definition");
 
 const router = express.Router();
 
+router.get("/ping", async (req, res) => {
+    try {
+        return res.json({ message: 'Pong' });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
 // Route sans paramètre
 router.get("/top", async (req, res) => {
     req.params.nb = 10; // Top10 par défaut

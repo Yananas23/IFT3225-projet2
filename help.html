@@ -10,6 +10,8 @@
         margin: 0;
         padding: 2rem;
         background-color: #f4f4f4;
+        color: #000;
+        transition: background-color 0.3s, color 0.3s;
     }
     h1 {
         text-align: center;
@@ -74,9 +76,52 @@
         border-bottom: 2px solid #ddd;
         padding-bottom: 0.5rem;
       }
+
+    /* Styles pour le mode sombre */
+    body.dark-mode {
+      background-color: #121212;
+      color: #f4f4f4;
+    }
+    .navbar.dark-mode , .command.dark-mode{
+      background-color: #1e1e1e;
+      color: #f4f4f4;
+    }
+    .navbar.dark-mode a {
+      color: #f4f4f4;
+    }
+    .navbar.dark-mode a:hover {
+      color: #2196F3;
+    }
+    .section-title.dark-mode {
+      color: #f4f4f4;
+    }
+
+    /* Styles pour le bouton de basculement */
+    #darkModeToggle {
+      background-color: #007bff;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: background-color 0.3s, transform 0.3s;
+    }
+
+    #darkModeToggle:hover {
+        background-color: #0056b3;
+        transform: scale(1.05);
+    }
+
+    #darkModeToggle:active {
+        background-color: #004494;
+        transform: scale(0.95);
+    }
   </style>
 </head>
 <body>
+  <button id="darkModeToggle">Mode sombre</button>
+
   <h1>📘 Documentation API REST</h1>
   <h3>Yanis Boulogne | Karl-Antoine Plouffe</h3>
   <nav class="navbar">
@@ -84,7 +129,8 @@
     <a href="#word">Mot</a>
     <a href="#game">Jeu</a>
     <a href="#admin">Admin</a>
-  </nav>
+    <a href="#admin">Rapport</a>
+  </nav>  
 
   <h2 class="section-title" id="user">Joueur</h2>
 
@@ -186,5 +232,26 @@
     <p>Ajoute une définition à un mot existant.</p>
   </div>
 
+  <script>
+    document.getElementById('darkModeToggle').addEventListener('click', function() {
+        document.body.classList.toggle('dark-mode');
+        document.querySelector('.navbar').classList.toggle('dark-mode');
+        var commands = document.querySelectorAll('.command');
+        commands.forEach(function(command) {
+            command.classList.toggle('dark-mode');
+        });
+        var sectionTitles = document.querySelectorAll('.section-title');
+        sectionTitles.forEach(function(sectionTitle) {
+            sectionTitle.classList.toggle('dark-mode');
+        });
+
+        // Changer le texte du bouton en fonction du mode
+        if (document.body.classList.contains('dark-mode')) {
+            this.textContent = 'Mode clair';
+        } else {
+            this.textContent = 'Mode sombre';
+        }
+    });
+</script>
 </body>
 </html>
