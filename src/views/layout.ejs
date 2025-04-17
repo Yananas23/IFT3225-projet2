@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title><%= title || "Projet 2" %></title>
+  <link rel="stylesheet" href="https://cdn.datatables.net/2.2.2/css/dataTables.dataTables.css" />
+</head>
+<body>
+  <div id="app">
+    <nav>
+      <a href="/jeu/word"><button>Jouer</button></a>
+      <a href="/jeu/def"><button>Ajouter une définition</button></a>
+      <a href="/dump/10"><button>Dump</button></a>
+    </nav>
+    <div id="view-container">
+      <%- body %>
+    </div>
+  </div>
+  <script src="https://cdn.datatables.net/2.2.2/js/dataTables.js"></script>
+</body>
+</html>

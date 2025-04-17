@@ -1,0 +1,144 @@
+<div class="game">  
+    <!-- Information sur la langue et la définition -->
+    <p><strong>Langue :</strong> <%= language %></p>
+    <p><strong>Définition :</strong> <%= definition %></p>
+    
+    <!-- Affichage du mot sous forme d'underscores -->
+    <p><strong>Mot à deviner :</strong> <span id="word-display">_____</span></p>
+  
+    <!-- Affichage du score et du temps -->
+    <p><strong>Temps restant :</strong> <span id="timer"><%= time %></span> secondes</p>
+    <p><strong>Score :</strong> <span id="score"><%= initialScore %></span> points</p>
+  
+    <!-- Zone pour afficher les lettres du mot -->
+    <div id="letters-container"></div>
+  
+    <!-- Zone d'entrée pour que l'utilisateur devine une lettre ou le mot entier -->
+    <input type="text" id="guess-input" placeholder="Devine une lettre ou le mot" maxlength="<%= wordLength %>">
+    <button onclick="submitGuess()">Soumettre</button>
+  
+    <!-- Affichage du bouton d'aide pour afficher les mots possibles -->
+    <button id="show-words-btn" onclick="showWords()" style="display: none;">Afficher les mots possibles (20 points)</button>
+    <div id="possible-words" style="display: none;"></div>
+  
+    <p id="message"></p> <!-- Message d'erreur ou d'info supplémentaire au besoin -->
+  
+    <script>
+        // Initialisation des variables
+        let word = "<%= word %>";
+        let definition = "<%= definition %>";
+        let score = <%= initialScore %>;
+        let timeLeft = <%= time %>;
+        let hintInterval = <%= hintFreq %>;
+        let revealed = Array(word.length).fill('_'); // Tableau des lettres révélées
+        let possibleWords = []; // Mots possibles à afficher
+        let hintActive = false;
+        let showWordsActive = false;
+        let gameFinished = false; // Indicateur pour savoir si le jeu est terminé
+        let pseudo = "<%= pseudo %>";
+
+        // Fonction de mise à jour de l'affichage
+        function updateDisplay() {
+        document.getElementById('letters-container').innerText = revealed.join(' ');
+        document.getElementById('score').innerText = score;
+        document.getElementById('timer').innerText = timeLeft;
+        document.getElementById('word-display').innerText = revealed.join(' ');
+        }
+
+        // Décrémente le timer et gère les indices toutes les `hintInterval` secondes
+        setInterval(() => {
+        if (!gameFinished && timeLeft > 0) {
+            timeLeft--;
+            if (timeLeft % hintInterval === 0 && !hintActive) {
+            revealHint();
+            }
+            updateDisplay();
+        } else if (!gameFinished) {
+            // Le temps est écoulé, afficher un message et arrêter
+            document.getElementById("message").innerText = "Le temps est écoulé ! Le mot était : " + word;
+            document.getElementById("guess-input").disabled = true;
+            gameFinished = true; // Marquer la fin du jeu
+            updateScoreOnServer(); // Mettre à jour le score une fois le jeu terminé
+        }
+        }, 1000);
+
+        // Révéler une lettre du mot
+        function revealHint() {
+        for (let i = 0; i < word.length; i++) {
+            if (revealed[i] === '_') {
+            revealed[i] = word[i];
+            score -= 10;  // Perdre 10 points pour chaque lettre révélée
+            hintActive = true;
+            updateDisplay();
+            break;
+            }
+        }
+        }
+
+        // Soumettre une lettre ou un mot entier
+        function submitGuess() {
+            let guess = document.getElementById('guess-input').value.toLowerCase();
+            document.getElementById('guess-input').value = '';
+
+            if (guess.length === 1) {
+                // Le joueur devine une lettre
+                let correctGuess = false;
+                for (let i = 0; i < word.length; i++) {
+                    if (word[i] === guess && revealed[i] === '_') {
+                        revealed[i] = guess;
+                        score += 5; // Gagner 5 points pour une bonne lettre
+                        correctGuess = true;
+                    }
+                }
+
+                if (!correctGuess) {
+                    score -= 5; // Perdre 5 points pour une mauvaise lettre
+                }
+            } else if (guess === word) {
+                // Le joueur a deviné tout le mot
+                score += timeLeft;  // Points en fonction du temps restant
+                document.getElementById("message").innerText = "Bravo ! Vous avez trouvé le mot avec un score de " + score + " points!";
+                document.getElementById("guess-input").disabled = true;
+                gameFinished = true; // Marquer la fin du jeu
+                updateScoreOnServer(); // Mettre à jour le score une fois le jeu terminé
+            } else {
+                // Mauvais mot
+                score -= 10;
+            }
+
+            updateDisplay();
+        }
+
+        // Afficher des mots possibles
+        function showWords() {
+            if (score >= 20) {
+                score -= 20;
+                // TODO Requête pour obtenir des mots possibles
+                possibleWords = ["example", "example2", "example3"]; // Liste d'exemple
+                document.getElementById('possible-words').innerHTML = possibleWords.join('<br>');
+                document.getElementById('possible-words').style.display = 'block';
+            }
+        }
+
+        // Mettre à jour le score sur le serveur à la fin de la partie
+        async function updateScoreOnServer() {
+            try {
+                const response = await fetch(`/score/${pseudo}/${score}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                });
+
+                if (!response.ok) {
+                    throw new Error('Erreur lors de la mise à jour du score!');
+                }
+                console.log("Score mis à jour sur le serveur.");
+            } catch (error) {
+                console.error("Erreur lors de la mise à jour du score : ", error);
+            }
+        }
+
+        updateDisplay();
+    </script>
+</div>

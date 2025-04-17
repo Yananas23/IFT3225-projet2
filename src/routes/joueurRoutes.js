@@ -66,6 +66,12 @@ router.get("/login/:pseudo/:pwd", async (req, res) => {
 
       if (!match) return res.status(401).json({ error: "Mot de passe incorrect" });
 
+      req.session.joueur = {
+        id: joueur.id,
+        pseudo: joueur.pseudo,
+        admin: joueur.admin
+      };
+
       res.json({ message: "Connexion réussie !" });
   } catch (error) {
       res.status(500).json({ error: error.message });
@@ -87,7 +93,12 @@ router.get("/logout/:pseudo/:pwd", async (req, res) => {
 
       await joueur.update({ loged: new Date() });
 
-      res.json({ message: "Deconnexion réussie !" });
+      req.session.destroy(err => {
+        if (err) {
+          return res.status(500).json({ error: "Erreur lors de la déconnexion!" });
+        }
+        res.json({ message: "Déconnexion réussie!" });
+      });
   } catch (error) {
       res.status(500).json({ error: error.message });
   }

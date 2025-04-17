@@ -1,0 +1,38 @@
+<table id="definitionsTable" class="display">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Définition</th>
+        <th>Source</th>
+        <th>Mots liés</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% definitions.forEach(def => { %>
+        <tr>
+          <td><%= def.id %></td>
+          <td><%= def.definition %></td>
+          <td><%= def.source || "—" %></td>
+          <td>
+            <% if (def.Words && def.Words.length > 0) { %>
+              <%= def.Words.map(w => w.word).join(", ") %>
+            <% } else { %>
+              Aucun mot
+            <% } %>
+          </td>
+        </tr>
+      <% }) %>
+    </tbody>
+</table>
+  
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        $('#definitionsTable').DataTable({
+        pageLength: <%= step %>,
+        lengthMenu: [5, 10, 20, 50, 100],
+        language: {
+            url: "//cdn.datatables.net/plug-ins/1.13.6/i18n/fr-FR.json"
+        }
+        });
+    });
+</script>
