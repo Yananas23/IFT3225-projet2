@@ -4,6 +4,7 @@ const sequelize = require("./src/config/database"); // Connexion à la DB
 const initModels = require("./src/models/init-models"); // Initialisation des modèles
 const expressLayouts = require('express-ejs-layouts'); //Layouts EJS
 const path = require('path');
+const session = require("express-session");
 
 // Initialiser les modèles Sequelize
 const models = initModels(sequelize);
@@ -16,6 +17,13 @@ const dumpRoute = require("./src/routes/dumpRoute");
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+
+app.use(session({
+  secret: 'dev-secret', // OK pour dev ou localhost
+  resave: false,
+  saveUninitialized: false,
+  cookie: { secure: false } // OK pour localhost
+}));
 
 // Configuration EJS
 app.set('view engine', 'ejs');
