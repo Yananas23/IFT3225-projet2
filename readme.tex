@@ -1,0 +1,83 @@
+\documentclass{article}
+
+\usepackage[french]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{amsfonts}            %For \leadsto
+\usepackage{amsmath}             %For \text
+\usepackage{fancybox}            %For \ovalbox
+\usepackage{color}
+\usepackage{geometry}
+\usepackage{array}
+\usepackage{hyperref}
+
+\DeclareUnicodeCharacter{03BB}{\ensuremath{{\color{black}{\lambda}}}}
+
+\title{Projet \#2}
+\author{IFT-3225}
+
+\begin{document}
+
+\maketitle
+
+\newcommand \mML {\ensuremath\mu\textsl{ML}}
+\newcommand \kw [1] {\textsf{#1}}
+\newcommand \id [1] {\textsl{#1}}
+\newcommand \punc [1] {\kw{`#1'}}
+\newcommand \str [1] {\texttt{"#1"}}
+\newenvironment{outitemize}{
+  \begin{itemize}
+  \let \origitem \item \def \item {\origitem[]\hspace{-18pt}}
+}{
+  \end{itemize}
+}
+\newcommand \Align [2][t] {\begin{array}[#1]{@{}l} #2 \end{array}}
+
+\noindent Yanis Boulogne (20316250)\newline
+Karl-Antoine Plouffe (20218864) \newline
+
+\section{Répartition des tâches}
+\bgroup
+\begin{table}[htbp]
+\centering
+    \setlength{\leftmargini}{0.5cm}
+    \begin{tabular}{| m{5cm} | m{5cm} |}
+        \hline
+        Yanis Boulogne & Karl-Antoine Plouffe \\
+        \hline
+        \begin{itemize} 
+            \item ...
+        \end{itemize} & 
+        \begin{itemize} 
+            \item ...
+        \end{itemize} \\
+        \hline
+    \end{tabular}
+\end{table}
+\egroup
+
+\section{Page HTML abritée au DIRO}
+...
+
+\section{Ressources externes}
+\subsection{Langages}
+\begin{itemize}
+  \item HTML
+  \item JavaScript
+  \item PHP
+\end{itemize}
+\subsection{Librairies}
+\begin{itemize}  
+  \item ...
+\end{itemize}
+
+\section{Commentaires et précisions}
+
+\subsection{...}
+...
+
+\subsection{...}
+...
+
+
+\end{document}
