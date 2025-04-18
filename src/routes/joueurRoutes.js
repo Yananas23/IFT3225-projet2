@@ -28,26 +28,41 @@ router.get("/:joueur", async (req, res) => {
 
 router.post("/add/:pseudo/:pwd", async (req, res) => {
   try {
-      const { pseudo, pwd } = req.params;
+    const { pseudo, pwd } = req.params;
 
-      // Vérifier si le pseudo existe déjà
-      const joueurExiste = await Joueur.findOne({ where: { pseudo } });
-      if (joueurExiste) {
-        return res.status(400).json({ error: "Ce pseudo est déjà pris !" });
-      }
+    // Vérifier si le pseudo existe déjà
+    const joueurExiste = await Joueur.findOne({ where: { pseudo } });
+    if (joueurExiste) {
+      return res.status(400).json({ error: "Ce pseudo est déjà pris !" });
+    }
 
-      // Hacher le mot de passe
-      const hashedPassword = await bcrypt.hash(pwd, 10);
+    // Hacher le mot de passe
+    const hashedPassword = await bcrypt.hash(pwd, 10);
 
-      // Créer le joueur
-      const newJoueur = await Joueur.create({
-        pseudo,
-        password: hashedPassword,
+    // Créer le joueur
+    const newJoueur = await Joueur.create({
+      pseudo,
+      password: hashedPassword,
+    });
+
+    // Déconnecter l'ancien joueur au besoin, puis connecter le nouveau
+    if (req.session.joueur) {
+      console.log(`Déconnexion de ${req.session.joueur.pseudo} pour nouveau joueur.`);
+      req.session.destroy(err => {
+        if (err) {
+          console.error("Erreur lors de la déconnexion de l'ancien joueur :", err);
+          return res.status(500).json({ error: "Erreur lors de la déconnexion de l'ancien joueur." });
+        }
+        login(newJoueur, req, res, () => {
+          res.json({ id: newJoueur.id, message: "Joueur ajouté et connecté!" });
+        });
       });
-
-      // Retourner l'ID du joueur
-      res.json({ id: newJoueur.id, message: "Joueur ajouté et connecté !" });
-
+    }
+    else {
+      login(newJoueur, req, res, () => {
+        res.json({ id: newJoueur.id, message: "Joueur ajouté et connecté!" });
+      });
+    }
   } catch (error) {
       res.status(500).json({ error: error.message });
   }
@@ -56,29 +71,38 @@ router.post("/add/:pseudo/:pwd", async (req, res) => {
 
 router.get("/login/:pseudo/:pwd", async (req, res) => {
   try {
-      const { pseudo, pwd } = req.params;
+    const { pseudo, pwd } = req.params;
 
-      const joueur = await Joueur.findOne({ where: { pseudo: pseudo }});
+    const joueur = await Joueur.findOne({ where: { pseudo: pseudo }});
 
-      if (!joueur) return res.status(404).json({ error: "Joueur non trouvé" });
+    if (!joueur) return res.status(404).json({ error: "Joueur non trouvé" });
 
-      const match = await bcrypt.compare(pwd, joueur.password);
+    const match = await bcrypt.compare(pwd, joueur.password);
 
-      if (!match) return res.status(401).json({ error: "Mot de passe incorrect" });
-
-      req.session.joueur = {
-        id: joueur.id,
-        pseudo: joueur.pseudo,
-        score: joueur.score,
-        admin: joueur.admin
-      };
-
-      res.json({ message: "Connexion réussie !" });
+    if (!match) return res.status(401).json({ error: "Mot de passe incorrect" });
+      
+    // Déconnecter joueur actif s'il y a lieu, puis effectuer login
+    if (req.session.joueur) {
+    console.log(`Déconnexion de ${req.session.joueur.pseudo}.`);
+    req.session.destroy(err => {
+      if (err) {
+        console.error(`Erreur lors de la déconnexion du joueur ${req.session.joueur.pseudo} :`, err);
+        return res.status(500).json({ error: "Erreur lors de la déconnexion." });
+      }
+      login(newJoueur, req, res, () => {
+        res.json({ id: newJoueur.id, message: "Connexion réussie!" });
+      });
+    });
+    }
+    else {
+    login(newJoueur, req, res, () => {
+      res.json({ id: newJoueur.id, message: "Connexion réussie!" });
+    });
+    }
   } catch (error) {
       res.status(500).json({ error: error.message });
   }
 });
-
 
 router.get("/logout/:pseudo/:pwd", async (req, res) => {
   try {
@@ -94,15 +118,40 @@ router.get("/logout/:pseudo/:pwd", async (req, res) => {
 
       await joueur.update({ loged: new Date() });
 
-      req.session.destroy(err => {
-        if (err) {
-          return res.status(500).json({ error: "Erreur lors de la déconnexion!" });
-        }
-        res.json({ message: "Déconnexion réussie!" });
-      });
+      // Détruire la session express
+      if (!req.session.joueur) {
+        res.json({ message: "Pas de session active... Déconnexion réussie?" });
+      }
+      else {
+        req.session.destroy(err => {
+          if (err) {
+            return res.status(500).json({ error: "Erreur lors de la déconnexion!" });
+          }
+          res.json({ message: "Déconnexion réussie!" });
+        });
+      }      
   } catch (error) {
       res.status(500).json({ error: error.message });
   }
 });
+
+// Fonction de connexion avec express session
+function login(joueur, req, res, next) {
+  req.session.regenerate(err => {
+    if (err) {
+      console.error("Erreur lors de l'opération \"regenerate\" de la session :", err);
+      return res.status(500).json({ error: "Erreur lors de la création de session." });
+    }
+
+    req.session.joueur = {
+      id: joueur.id,
+      pseudo: joueur.pseudo,
+      score: joueur.score,
+      admin: joueur.admin
+    };
+
+    next(); // Continue le traitement
+  });
+}
 
 module.exports = router;
