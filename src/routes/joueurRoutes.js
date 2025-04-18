@@ -69,6 +69,7 @@ router.get("/login/:pseudo/:pwd", async (req, res) => {
       req.session.joueur = {
         id: joueur.id,
         pseudo: joueur.pseudo,
+        score: joueur.score,
         admin: joueur.admin
       };
 
