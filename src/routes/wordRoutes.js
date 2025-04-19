@@ -4,6 +4,7 @@ const Joueur = require("../models/joueur");
 const Word = require("../models/word");
 const WordDefinition = require("../models/word_definition");
 const Definition = require("../models/definition");
+const sequelize = require("../config/database");
 
 const router = express.Router();
 
@@ -39,23 +40,26 @@ router.get("/add", async (req, res) => {
 
                         let [wordEntry] = await Word.findOrCreate({ where: { word, lang } });
                         
-                        let [definitionEntry] = await Definition.findOrCreate({ where: { definition, source }  });
+                        let [definitionEntry] = await Definition.findOrCreate({ where: { definition, source } });
 
                         await WordDefinition.findOrCreate({
-                            where: { 'w-id': wordEntry.id, 'd-id': definitionEntry.id },
+                            where: { 'w-id': wordEntry.id, 'd-id': definitionEntry.id }
                         });
                     }
 
-                    res.json({ message: "Données insérées avec succès !"});
+                    res.json({ message: "Données insérées avec succès !" });
                 } catch (error) {
+                    console.error(error);
                     res.status(500).json({ error: "Erreur lors de l'insertion des données" });
                 }
             });
-        }).on("error", () => {
+        }).on("error", (err) => {
+            console.error(err);
             res.status(500).json({ error: "Erreur lors de la récupération des données" });
         });
 
     } catch (error) {
+        console.error(error);
         res.status(500).json({ error: error.message });
     }
 });
@@ -82,39 +86,37 @@ async function handleDefRequest(req, res) {
         let nb = parseInt(req.params.nb, 10);
         let from = parseInt(req.params.from, 10);
 
-        // Requête avec jointures
-        const wordsWithDefinitions = await Word.findAll({
-            attributes: ['id', 'word'],
-            include: [
-                {
-                    model: WordDefinition,
-                    include: [
-                        {
-                            model: Definition,
-                            attributes: ['id', 'definition']
-                        }
-                    ]
-                }
-            ],
-            limit: nb,
-            offset: from - 1
-        });
-        // console.log(wordsWithDefinitions);
+        // Requête pour récupérer les mots avec pagination
+        const words = await sequelize.query(
+            `SELECT id, word FROM word LIMIT ? OFFSET ?`, 
+            [nb, from - 1]
+        );
 
-        // Structuration du JSON
-        const result = wordsWithDefinitions.map(word => ({
-            word: word.word,
-            id: word.id,
-            def: word.Word_Definitions ? word.Word_Definitions.map(wd => wd.Definition?.definition) : []
-        }));
+        const result = [];
+
+        // Pour chaque mot, récupérer ses définitions
+        for (const word of words) {
+            // Récupérer les définitions associées au mot
+            const definitions = await sequelize.query(
+                `SELECT d.definition 
+                 FROM definition d
+                 JOIN word_definition wd ON d.id = wd.\`d-id\`
+                 WHERE wd.\`w-id\` = ?`,
+                [word.id]
+            );
+
+            result.push({
+                word: word.word,
+                id: word.id,
+                def: definitions.map(d => d.definition)
+            });
+        }
 
         res.json({ words: result });
     } catch (error) {
+        console.error(error);
         res.status(500).json({ error: error.message });
     }
-};
-
-
-
+}
 
 module.exports = router;

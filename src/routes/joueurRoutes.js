@@ -1,30 +1,31 @@
 const bcrypt = require("bcrypt");
 const express = require("express");
 const Joueur = require("../models/joueur");
+const sequelize = require("../config/database");
 
 const router = express.Router();
 
 router.get("/all", async (req, res) => {
   try {
-      const joueurs = await Joueur.findAll();
-      res.json(joueurs);
+    // Utiliser la méthode findAll de notre émulation
+    const joueurs = await sequelize.query("SELECT * FROM joueur", []);
+    res.json(joueurs);
   } catch (error) {
-      res.status(500).json({ error: error.message });
+    res.status(500).json({ error: error.message });
   }
 });
 
 router.get("/:joueur", async (req, res) => {
   try {
-      const joueur = await Joueur.findOne({ where: { pseudo: req.params.joueur } });
+    const joueur = await Joueur.findOne({ where: { pseudo: req.params.joueur } });
 
-      if (!joueur) return res.status(404).json({ error: "Joueur non trouvé" });
+    if (!joueur) return res.status(404).json({ error: "Joueur non trouvé" });
 
-      res.json(joueur);
+    res.json(joueur);
   } catch (error) {
-      res.status(500).json({ error: error.message });
+    res.status(500).json({ error: error.message });
   }
 });
-
 
 router.post("/add/:pseudo/:pwd", async (req, res) => {
   try {
@@ -39,10 +40,14 @@ router.post("/add/:pseudo/:pwd", async (req, res) => {
     // Hacher le mot de passe
     const hashedPassword = await bcrypt.hash(pwd, 10);
 
-    // Créer le joueur
+    // Créer le joueur avec notre méthode personnalisée
     const newJoueur = await Joueur.create({
       pseudo,
       password: hashedPassword,
+      game: 0,
+      win: 0,
+      score: 0,
+      admin: 0
     });
 
     // Déconnecter l'ancien joueur au besoin, puis connecter le nouveau
@@ -64,16 +69,16 @@ router.post("/add/:pseudo/:pwd", async (req, res) => {
       });
     }
   } catch (error) {
-      res.status(500).json({ error: error.message });
+    res.status(500).json({ error: error.message });
   }
 });
-
 
 router.get("/login/:pseudo/:pwd", async (req, res) => {
   try {
     const { pseudo, pwd } = req.params;
+    const { pseudo, pwd } = req.params;
 
-    const joueur = await Joueur.findOne({ where: { pseudo: pseudo }});
+    const joueur = await Joueur.findOne({ where: { pseudo } });
 
     if (!joueur) return res.status(404).json({ error: "Joueur non trouvé" });
 
@@ -100,23 +105,25 @@ router.get("/login/:pseudo/:pwd", async (req, res) => {
       });
     }
   } catch (error) {
-      res.status(500).json({ error: error.message });
+    res.status(500).json({ error: error.message });
   }
 });
 
 router.get("/logout/:pseudo/:pwd", async (req, res) => {
   try {
-      const { pseudo, pwd } = req.params;
+    const { pseudo, pwd } = req.params;
 
-      const joueur = await Joueur.findOne({ where: { pseudo: pseudo }});
+    const joueur = await Joueur.findOne({ where: { pseudo } });
 
-      if (!joueur) return res.status(404).json({ error: "Joueur non trouvé" });
+    if (!joueur) return res.status(404).json({ error: "Joueur non trouvé" });
 
-      const match = await bcrypt.compare(pwd, joueur.password);
+    const match = await bcrypt.compare(pwd, joueur.password);
 
-      if (!match) return res.status(401).json({ error: "Mot de passe incorrect" });
+    if (!match) return res.status(401).json({ error: "Mot de passe incorrect" });
 
-      await joueur.update({ loged: new Date() });
+    // Utiliser la méthode update du modèle pour mettre à jour la date de déconnexion
+    const currentDate = new Date().toISOString().slice(0, 19).replace('T', ' ');
+    await Joueur.update({ loged: currentDate }, { where: { pseudo } });
 
       // Détruire la session express
       if (!req.session.joueur) {
@@ -131,7 +138,7 @@ router.get("/logout/:pseudo/:pwd", async (req, res) => {
         });
       }      
   } catch (error) {
-      res.status(500).json({ error: error.message });
+    res.status(500).json({ error: error.message });
   }
 });
 
