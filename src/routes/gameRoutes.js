@@ -86,6 +86,45 @@ router.put("/score/:pseudo/:pts", async (req, res) => {
 });
 
 // Routes finales
+router.get("/word/:lg?/:time?/:hint?", async (req, res) => {
+    try {
+        const { lg = "en", time = 60 } = req.params;  // Langue et temps par défaut
+        const hintIntervalTime = req.params.hint || 10;  // Par défaut, 10 secondes
+
+        // Récupérer un mot aléatoire de la langue spécifiée
+        const wordData = await getRandomWord(lg);
+        if (!wordData) {
+            return res.status(404).send("Aucun mot trouvé.");
+        }
+
+        const { word, wordId, definition } = wordData;
+
+        // Initialiser le score du joueur
+        const initialScore = 10 * word.length;
+        let score = initialScore;
+
+        // Si le joueur est connecté, on récupère son pseudo
+        const pseudo = req.session.joueur?.pseudo || "anonyme";
+
+        // Afficher la page de jeu avec les informations nécessaires
+        res.render("game", {
+            layout: "layout",
+            title: "Jeu de mots",
+            word,
+            wordId,
+            definition,
+            timeLimit: time,
+            score,
+            pseudo,
+            isConnected: pseudo !== "anonyme",
+            hintIntervalTime,
+        });
+
+    } catch (err) {
+        console.error(err);
+        res.status(500).send("Erreur lors de la création du jeu.");
+    }
+});
 
 router.get("/def/:lg?/:time?", async (req, res) => {
     try {
