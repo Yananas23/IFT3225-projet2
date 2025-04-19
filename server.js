@@ -114,9 +114,9 @@ async function startServer() {
 
       // Importer les données depuis le fichier local
       try {
-        //console.log("Importation des données depuis le fichier local...");
-        //const message = await importWordsFromLocalFile();
-        //console.log("Importation réussie :", message);
+        console.log("Importation des données depuis le fichier local...");
+        const message = await importWordsFromLocalFile();
+        console.log("Importation réussie :", message);
       } catch (error) {
         console.error("Erreur d'importation :", error.message);
       }
