@@ -95,9 +95,9 @@ router.get("/login/:pseudo/:pwd", async (req, res) => {
     });
     }
     else {
-    login(newJoueur, req, res, () => {
-      res.json({ id: newJoueur.id, message: "Connexion réussie!" });
-    });
+      login(newJoueur, req, res, () => {
+        res.json({ id: newJoueur.id, message: "Connexion réussie!" });
+      });
     }
   } catch (error) {
       res.status(500).json({ error: error.message });

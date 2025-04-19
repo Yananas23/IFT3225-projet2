@@ -1,38 +1,45 @@
+<h1><%= title %></h1>
+
+<!-- Table pour afficher toutes les définitions -->
 <table id="definitionsTable" class="display">
-    <thead>
+  <thead>
+    <tr>
+      <th>Langue</th>
+      <th>Mot</th>
+      <th>Définition</th>
+      <th>Source</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% definitions.forEach(def => { %>
       <tr>
-        <th>ID</th>
-        <th>Définition</th>
-        <th>Source</th>
-        <th>Mots liés</th>
+        <td><%= def.lang || "—" %></td>
+        <td><%= def.word || "—" %></td>
+        <td><%= def.definition %></td>
+        <td><%= def.source || "—" %></td>
       </tr>
-    </thead>
-    <tbody>
-      <% definitions.forEach(def => { %>
-        <tr>
-          <td><%= def.id %></td>
-          <td><%= def.definition %></td>
-          <td><%= def.source || "—" %></td>
-          <td>
-            <% if (def.Words && def.Words.length > 0) { %>
-              <%= def.Words.map(w => w.word).join(", ") %>
-            <% } else { %>
-              Aucun mot
-            <% } %>
-          </td>
-        </tr>
-      <% }) %>
-    </tbody>
+    <% }) %>
+  </tbody>
 </table>
-  
+
+<!-- CSS de DataTables -->
+<link rel="stylesheet" href="https://cdn.datatables.net/2.2.2/css/jquery.dataTables.min.css">
+
+<!-- Script jQuery (Nécessaire pour DataTables) -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<!-- Script de DataTables -->
+<script src="https://cdn.datatables.net/2.2.2/js/jquery.dataTables.min.js"></script>
+
 <script>
-    document.addEventListener("DOMContentLoaded", function () {
-        $('#definitionsTable').DataTable({
-        pageLength: <%= step %>,
-        lengthMenu: [5, 10, 20, 50, 100],
-        language: {
-            url: "//cdn.datatables.net/plug-ins/1.13.6/i18n/fr-FR.json"
-        }
-        });
+  document.addEventListener("DOMContentLoaded", function () {
+    let table = new DataTable('#definitionsTable', {
+      paging: true,             // Active la pagination
+      pageLength: <%= step %>,           // Définit le nombre d'éléments par page
+      lengthMenu: [5, 10, 20, 50, 100], // Options pour le nombre d'éléments par page
+      searching: true,          // Active la barre de recherche
+      info: true,               // Affiche les informations sur le nombre d'entrées
+      stateSave: false,
     });
+  });
 </script>

@@ -6,29 +6,32 @@ const router = express.Router();
 
 router.get("/:step?", async (req, res) => {
   try {
-    const step = parseInt(req.params.step) || 10;
-    const page = parseInt(req.query.page) || 1;
-    const offset = (page - 1) * step;
+    const step = parseInt(req.params.step, 10) || 10;
 
-    const { count, rows: definitions } = await Definition.findAndCountAll({
-      include: [
-        {
-          model: Word,
-          through: { attributes: [] },
-        }
-      ],
-      limit: step,
-      offset: offset
+    const definitions = await Definition.findAll({
+      include: [{
+        model: Word,
+        through: { attributes: [] }
+      }]
     });
 
-    const totalPages = Math.ceil(count / step);
+    // Simplification des définitions (si tu veux garder cette logique)
+    const simplifiedDefinitions = definitions.map(def => {
+      const firstWord = def.Words?.[0] || null;
+      return {
+        id: def.id,
+        definition: def.definition,
+        source: def.source,
+        word: firstWord?.word || null,
+        lang: firstWord?.lang || null
+      };
+    });
 
+    // Envoie toutes les définitions sans pagination côté serveur
     res.render("dump", {
-      title: "Dump des définitions",
-      definitions,
-      step,
-      currentPage: page,
-      totalPages
+      title: "Dump des définitions :",
+      definitions: simplifiedDefinitions,
+      step: step,
     });
   } catch (error) {
     console.error("Erreur dans /dump :", error);
