@@ -4,7 +4,8 @@ require("dotenv").config();
 // Créer une classe qui émule certaines fonctionnalités de Sequelize
 class PHPBridge {
   constructor() {
-    this.endpoint = "http://localhost/IFT3225-projet2 - php/src/config/db-bridge.php";
+    const endpoint = process.env.ENDPOINT || '/';
+    this.endpoint = `${endpoint}db-bridge.php`;
     this.models = {};
   }
 
@@ -143,6 +144,7 @@ async function testConnection() {
   try {
     await sequelize.authenticate();
     console.log("✅ Connexion à MySQL réussie via le pont PHP !");
+    console.log(`Base de données: ${process.env.DB_NAME}`);
   } catch (error) {
     console.error("❌ Erreur de connexion :", error);
   }
