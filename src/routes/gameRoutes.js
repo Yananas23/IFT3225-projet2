@@ -83,7 +83,7 @@ router.put("/score/:pseudo/:pts", async (req, res) => {
     }
 });
 
-router.get("/word/:lg?/:time?/:hint?", authRequired, async (req, res) => {
+router.get("/word/:lg?/:time?/:hint?", async (req, res) => {
     try {
         const lang = req.params.lg || 'en';
         const time = parseInt(req.params.time) || 60;
@@ -116,88 +116,98 @@ router.get("/word/:lg?/:time?/:hint?", authRequired, async (req, res) => {
     }
 });
 
-router.get("/def/:lg?/:time?", authRequired, async (req, res) => {
+router.get("/def/:lg?/:time?", async (req, res) => {
     try {
-        const lang = req.params.lg || 'en'; // Langue par défaut : 'en'
-        const time = parseInt(req.params.time) || 60; // Temps par défaut : 60 secondes
+        const lang = req.params.lg || "en";
+        const time = parseInt(req.params.time, 10) || 60;
 
-        // Récupérer un mot aléatoire pour cette langue
         const wordData = await getRandomWord(lang);
         if (!wordData) {
-            return res.status(404).send("Aucun mot trouvé pour cette langue.");
+            return res.status(404).send("Aucun mot trouvé.");
         }
 
-        // Récupérer les informations du joueur
-        const joueur = req.session.joueur;
-        if (!joueur) {
-            return res.status(401).send("Aucun utilisateur connecté!");
+        const pseudo = req.session.joueur?.pseudo || null;
+        let score = null;
+
+        if (pseudo) {
+            const joueur = await Joueur.findOne({ where: { pseudo } });
+            score = joueur?.score ?? null;
         }
 
-        // Affichage du mot et de la définition sur la page
-        res.render("defGame", {
+        res.render("def_game", {
             layout: "layout",
+            title: "Jeu des définitions",
             word: wordData.word,
-            time,
+            wordId: wordData.wordId,
             language: lang,
-            pseudo: joueur.pseudo
+            time,
+            isConnected: !!pseudo,
+            pseudo,
+            globalScore: score
         });
-    } catch (error) {
-        console.error(error);
+
+    } catch (err) {
+        console.error("Erreur dans /def :", err);
         res.status(500).send("Erreur lors de la génération de la partie.");
     }
 });
 
-router.post("/def/:lg?", authRequired, async (req, res) => {
+router.post("/def/:wordId", async (req, res) => {
     try {
-        const { word, definition, pseudo } = req.body;
-        const lang = req.params.lg || 'en';
+        const { wordId } = req.params;
+        const defs = Array.isArray(req.body.definition)
+            ? req.body.definition
+            : [req.body.definition];
 
-        // Vérifier que le mot existe dans la base de données pour cette langue
-        const wordRecord = await Word.findOne({ where: { word, lang } });
-        if (!wordRecord) {
-            return res.status(400).json({ error: "Ce mot n'existe pas dans la langue spécifiée." });
-        }
+        const pseudo = req.session.joueur?.pseudo || "anonyme";
+        const word = await Word.findByPk(wordId);
+        if (!word) return res.status(404).send("Mot non trouvé.");
 
-        // Vérifier si la définition est valide (entre 5 et 200 caractères)
-        if (definition.length < 5 || definition.length > 200) {
-            return res.status(400).json({ error: "La définition doit avoir entre 5 et 200 caractères." });
-        }
-
-        // Vérifier si la définition existe déjà pour ce mot
-        const existingDefinition = await Definition.findOne({
-            where: { def: definition }
-        });
-
-        if (existingDefinition) {
-            // Vérifier si la définition est déjà liée au mot
-            const existingAssociation = await Word_Definition.findOne({
-                where: { wordId: wordRecord.id, definitionId: existingDefinition.id }
-            });
-
-            if (existingAssociation) {
-                return res.status(400).json({ error: "Cette définition est déjà associée à ce mot." });
+        const existingDefs = await Definition.findAll({
+            include: {
+                model: Word,
+                where: { id: wordId }
             }
+        });
+        const existingTexts = new Set(existingDefs.map(def => def.definition.toLowerCase()));
+
+        let validDefs = 0;
+        for (let def of defs) {
+            const text = def.trim();
+            if (text.length < 5 || text.length > 200) continue;
+            if (existingTexts.has(text.toLowerCase())) continue;
+
+            const newDef = await Definition.create({ definition: text, source: pseudo });
+            await WordDefinition.create({ wordId: word.id, definitionId: newDef.id });
+            validDefs++;
         }
 
-        // Ajouter la définition et l'associer au mot
-        const [newDefinition, created] = await Definition.findOrCreate({
-            where: { def: definition },
-            defaults: { def: definition }
+        let updatedScore = null;
+        if (req.session.joueur && validDefs > 0) {
+            const joueur = await Joueur.findOne({ where: { pseudo } });
+            updatedScore = joueur.score + validDefs * 5;
+            await Joueur.update({ score: updatedScore }, { where: { pseudo } });
+            req.session.joueur.score = updatedScore;
+        }
+
+        res.render("def_result", {
+            layout: "layout",
+            pseudo,
+            gainedPoints: validDefs * 5,
+            updatedScore,
+            isConnected: !!req.session.joueur
         });
 
-        await Word_Definition.create({
-            wordId: wordRecord.id,
-            definitionId: newDefinition.id
-        });
-
-        // Mettre à jour le score (5 points pour chaque définition valide)
-        res.json({ message: `Définition ajoutée avec succès ! Score : ${5}` });
-
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: error.message });
+    } catch (err) {
+        console.error(err);
+        res.status(500).send("Erreur lors de la soumission.");
     }
 });
+
+
+
+
+// FONCTIONS
 
 function authRequired(req, res, next) {
     if (!req.session.joueur) {

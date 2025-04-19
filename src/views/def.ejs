@@ -1,3 +1,40 @@
-<div>
-    
-</div>
+<h1>Définir le mot : <%= word %></h1>
+
+<% if (isConnected) { %>
+  <p>Connecté en tant que : <strong><%= pseudo %></strong> | Score actuel : <strong><%= globalScore %></strong></p>
+<% } else { %>
+  <p><em>Non connecté - les points ne seront pas enregistrés.</em></p>
+<% } %>
+
+<p>Vous avez <strong><%= time %></strong> secondes pour entrer autant de définitions que possible.</p>
+
+<form method="POST" action="/jeu/def/<%= wordId %>">
+  <input type="hidden" name="wordId" value="<%= wordId %>" />
+  <div id="definition-list">
+    <input type="text" name="definition" placeholder="Définition 1" required /><br />
+  </div>
+
+  <button type="button" onclick="ajouterChamp()">+ Ajouter une autre définition</button><br><br>
+  <button type="submit">Valider mes définitions</button>
+</form>
+
+<script>
+  let compteur = 1;
+
+  function ajouterChamp() {
+    compteur++;
+    const div = document.getElementById("definition-list");
+    const input = document.createElement("input");
+    input.type = "text";
+    input.name = "definition";
+    input.placeholder = "Définition " + compteur;
+    div.appendChild(document.createElement("br"));
+    div.appendChild(input);
+  }
+
+  // Minuteur
+  const temps = <%= time %>;
+  setTimeout(() => {
+    document.querySelector("form").submit();
+  }, temps * 1000);
+</script>
