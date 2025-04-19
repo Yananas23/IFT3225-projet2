@@ -76,7 +76,6 @@ router.post("/add/:pseudo/:pwd", async (req, res) => {
 router.get("/login/:pseudo/:pwd", async (req, res) => {
   try {
     const { pseudo, pwd } = req.params;
-    const { pseudo, pwd } = req.params;
 
     const joueur = await Joueur.findOne({ where: { pseudo } });
 
