@@ -14,8 +14,7 @@ router.get("/:step?", async (req, res) => {
         through: { attributes: [] }
       }]
     });
-
-    // Simplification des définitions (si tu veux garder cette logique)
+    
     const simplifiedDefinitions = definitions.map(def => {
       const firstWord = def.Words?.[0] || null;
       return {
@@ -26,8 +25,7 @@ router.get("/:step?", async (req, res) => {
         lang: firstWord?.lang || null
       };
     });
-
-    // Envoie toutes les définitions sans pagination côté serveur
+    
     res.render("dump", {
       title: "Dump des définitions :",
       definitions: simplifiedDefinitions,

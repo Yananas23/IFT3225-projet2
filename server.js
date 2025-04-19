@@ -40,6 +40,9 @@ app.set('layout', 'layout');
 // Middleware pour JSON
 app.use(express.json());
 
+// Middleware pour que Express puisse lire les données d’un formulaire POST
+app.use(express.urlencoded({ extended: true }));
+
 // Enregistrer les routes
 app.use("/gamers", joueurRoutes);
 app.use("/jeu", gameRoutes);
@@ -115,8 +118,8 @@ async function startServer() {
       // Importer les données depuis le fichier local
       try {
         console.log("Importation des données depuis le fichier local...");
-        const message = await importWordsFromLocalFile();
-        console.log("Importation réussie :", message);
+        //const message = await importWordsFromLocalFile();
+        //console.log("Importation réussie :", message);
       } catch (error) {
         console.error("Erreur d'importation :", error.message);
       }
