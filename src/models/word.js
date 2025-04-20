@@ -28,30 +28,35 @@ Word.findOne = async function({ where }) {
 }
 
 Word.findAll = async function(options = {}) {
-  let sql = "SELECT * FROM word";
-  const params = [];
-  
-  if (options.where) {
-    sql += " WHERE ";
-    const clauses = [];
+  try{
+    let sql = "SELECT * FROM word";
+    const params = [];
     
-    for (const [key, value] of Object.entries(options.where)) {
-      clauses.push(`${key} = ?`);
-      params.push(value);
+    if (options.where) {
+      sql += " WHERE ";
+      const clauses = [];
+      
+      for (const [key, value] of Object.entries(options.where)) {
+        clauses.push(`${key} = ?`);
+        params.push(value);
+      }
+      
+      sql += clauses.join(" AND ");
     }
     
-    sql += clauses.join(" AND ");
+    if (options.limit) {
+      sql += ` LIMIT ${options.limit}`;
+    }
+    
+    if (options.offset !== undefined) {
+      sql += ` OFFSET ${options.offset}`;
+    }
+    
+    return sequelize.query(sql, params);
+  } catch (error) {
+    console.error("Erreur dans Word.findAll:", error);
+    return null;
   }
-  
-  if (options.limit) {
-    sql += ` LIMIT ${options.limit}`;
-  }
-  
-  if (options.offset !== undefined) {
-    sql += ` OFFSET ${options.offset}`;
-  }
-  
-  return sequelize.query(sql, params);
 };
 
 Word.findOrCreate = async function({ where }) {

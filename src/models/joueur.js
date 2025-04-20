@@ -22,6 +22,30 @@ Joueur.findOne = async function({ where }) {
   return results.length > 0 ? results[0] : null;
 };
 
+Joueur.findAll = async function(conditions = {}) {
+  try{
+    let sql = "SELECT * FROM joueur";
+    const params = [];
+    
+    if (conditions.where) {
+      sql += ' WHERE ';
+      const clauses = [];
+      
+      for (const [key, value] of Object.entries(conditions.where)) {
+        clauses.push(`${key} = ?`);
+        params.push(value);
+      }
+      
+      sql += clauses.join(' AND ');
+    }
+    
+    return await sequelize.query(sql, params);
+  } catch (error) {
+    console.error("Erreur dans Joueur.findAll:", error);
+    return null;
+  }
+};
+
 Joueur.create = async function(data) {
   const fields = Object.keys(data).join(", ");
   const placeholders = Object.keys(data).map(() => "?").join(", ");

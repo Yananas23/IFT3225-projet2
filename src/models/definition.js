@@ -26,6 +26,30 @@ Definition.findOne = async function({ where }) {
   }
 };
 
+Definition.findAll = async function(conditions = {}) {
+  try{
+    let sql = "SELECT * FROM definition";
+    const params = [];
+    
+    if (conditions.where) {
+      sql += ' WHERE ';
+      const clauses = [];
+      
+      for (const [key, value] of Object.entries(conditions.where)) {
+        clauses.push(`${key} = ?`);
+        params.push(value);
+      }
+      
+      sql += clauses.join(' AND ');
+    }
+    
+    return await sequelize.query(sql, params);
+  } catch (error) {
+    console.error("Erreur dans Definition.findAll:", error);
+    return null;
+  }
+};
+
 Definition.findOrCreate = async function({ where }) {
   try {
     // D'abord, essayez de trouver l'enregistrement
