@@ -8,7 +8,6 @@ const WordDefinition = require("../models/word_definition");
 const router = express.Router();
 
 // Routes temporaires
-
 router.get("/play/:pseudo", async (req, res) => {
     try {
         const { pseudo } = req.params;
