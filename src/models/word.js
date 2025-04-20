@@ -10,12 +10,22 @@ const Word = sequelize.define("word", {
 
 // Méthodes spécifiques pour le modèle Word
 Word.findOne = async function({ where }) {
-  const results = await sequelize.query(
-    `SELECT * FROM word WHERE ${Object.keys(where)[0]} = ?`, 
-    [Object.values(where)[0]]
-  );
-  return results.length > 0 ? results[0] : null;
-};
+  try {
+    const key = Object.keys(where)[0];
+    const value = Object.values(where)[0];
+    
+    const results = await sequelize.query(
+      `SELECT * FROM word WHERE ${key} = ?`, 
+      [value]
+    );
+    
+    // Toujours vérifier si results existe et a au moins un élément
+    return results && results.length > 0 ? results[0] : null;
+  } catch (error) {
+    console.error("Erreur dans Word.findOne:", error);
+    return null;
+  }
+}
 
 Word.findAll = async function(options = {}) {
   let sql = "SELECT * FROM word";
@@ -45,29 +55,53 @@ Word.findAll = async function(options = {}) {
 };
 
 Word.findOrCreate = async function({ where }) {
-  const existingWord = await this.findOne({ where });
-  
-  if (existingWord) {
-    return [existingWord, false];
+  try {
+    // D'abord, essayez de trouver l'enregistrement
+    const existingRecord = await this.findOne({ where });
+    
+    // Si trouvé, retournez-le dans un tableau (pour compatibilité avec Sequelize)
+    if (existingRecord) {
+      return [existingRecord, false]; // false indique qu'il n'a pas été créé
+    }
+    
+    // Sinon, créez un nouvel enregistrement
+    const newRecord = await this.create(where);
+    return [newRecord, true]; // true indique qu'il a été créé
+  } catch (error) {
+    console.error("Erreur dans findOrCreate:", error);
+    throw error;
   }
-  
-  const newWord = await this.create(where);
-  return [newWord, true];
 };
 
 Word.create = async function(data) {
   const fields = Object.keys(data).join(", ");
   const placeholders = Object.keys(data).map(() => "?").join(", ");
   const values = Object.values(data);
-  
+
+  // Insertion
   await sequelize.query(
     `INSERT INTO word (${fields}) VALUES (${placeholders})`,
     values
   );
-  
-  // Récupérer l'ID inséré et retourner l'objet créé
-  const insertId = await sequelize.getInsertId();
+
+  // Générer la clause WHERE pour retrouver l'élément inséré
+  const whereClause = Object.keys(data)
+    .map(field => `${field} = ?`)
+    .join(" AND ");
+
+  const selectQuery = `
+    SELECT id FROM word 
+    WHERE ${whereClause} 
+    ORDER BY id DESC 
+    LIMIT 1
+  `;
+
+  const results = await sequelize.query(selectQuery, values);
+
+  const insertId = results?.data[0]['id'];
+
   return { id: insertId, ...data };
 };
+
 
 module.exports = Word;

@@ -8,8 +8,8 @@ function initModels() {
     const sequelize = require("../config/database");
     return sequelize.query(
       `SELECT d.* FROM definition d 
-       JOIN word_definition wd ON d.id = wd.d-id 
-       WHERE wd.w-id = ?`,
+       JOIN word_definition wd ON d.id = "wd.d-id"
+       WHERE "wd.w-id" = ?`,
       [wordId]
     );
   };
@@ -18,8 +18,8 @@ function initModels() {
     const sequelize = require("../config/database");
     return sequelize.query(
       `SELECT w.* FROM word w 
-       JOIN word_definition wd ON w.id = wd.w-id 
-       WHERE wd.d-id = ?`,
+       JOIN word_definition wd ON w.id = "wd.w-id" 
+       WHERE "wd.d-id" = ?`,
       [definitionId]
     );
   };

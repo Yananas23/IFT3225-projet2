@@ -24,13 +24,22 @@ class PHPBridge {
 
   async query(sql, params = []) {
     try {
-      const response = await axios.post(`${this.endpoint}?action=query`, {
-        sql,
-        params
+        const processedParams = params.map(param => {
+        if (!isNaN(param)) {
+            return Number(param);
+        }
+        return param;
       });
-      return response.data.data;
+      
+      const response = await axios.post(`${this.endpoint}?action=query`, {
+          sql,
+          params: processedParams
+      });
+      
+      return response.data;
     } catch (error) {
-      throw error.response?.data?.error || error;
+        console.error("Erreur de requête SQL:", sql, params, error);
+        return { data: [] }; // Retourner un objet avec data vide en cas d'erreur
     }
   }
 
@@ -69,8 +78,8 @@ class PHPBridge {
           
           sql += clauses.join(' AND ');
         }
-        
-        return this.query(sql, params);
+        let result = this.query(sql, params);
+        return result.data;
       },
       
       findOne: async (conditions = {}) => {
@@ -83,12 +92,13 @@ class PHPBridge {
         const placeholders = Object.keys(data).map(() => "?").join(", ");
         const values = Object.values(data);
         
-        await this.query(
-          `INSERT INTO ${modelName} (${fields}) VALUES (${placeholders})`,
-          values
+        const response = await this.query(
+            `INSERT INTO ${modelName} (${fields}) VALUES (${placeholders})`,
+            values
         );
         
-        const insertId = await this.getInsertId();
+        // Récupérer l'ID depuis la réponse de la requête
+        const insertId = response.insertId || 0;
         return { id: insertId, ...data };
       },
       
@@ -109,8 +119,9 @@ class PHPBridge {
           
           sql += clauses.join(' AND ');
         }
-        
-        return this.query(sql, values);
+
+        let result = this.query(sql, values)
+        return result.data;
       },
       
       destroy: async (conditions) => {
@@ -129,7 +140,8 @@ class PHPBridge {
           sql += clauses.join(' AND ');
         }
         
-        return this.query(sql, params);
+        let result = this.query(sql, params);
+        return result.data;
       }
     };
     

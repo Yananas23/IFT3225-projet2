@@ -31,10 +31,12 @@ async function handleTopRequest(req, res) {
         let nb = parseInt(req.params.nb, 10);
         
         // Récupérer tous les joueurs triés par score décroissant avec limite
-        const joueurs = await sequelize.query(
+        const joueursResult = await sequelize.query(
             `SELECT pseudo, score FROM joueur ORDER BY score DESC LIMIT ?`,
             [nb]
         );
+
+        const joueurs = joueursResult.data;
 
         res.json({
             joueurs: joueurs.map(j => ({ pseudo: j.pseudo, score: j.score }))
@@ -71,11 +73,13 @@ router.delete("/delete/def/:id", async (req, res) => {
     try {
         // Vérifier si la définition existe
         const definitionId = parseInt(req.params.id, 10);
-        const definition = await sequelize.query(
+        const definitionResult = await sequelize.query(
             `SELECT id FROM definition WHERE id = ?`,
             [definitionId]
         );
         
+        const definition = definitionResult.data;
+
         if (definition.length === 0) {
             return res.status(404).json({ message: 'Élément non trouvé' });
         }
@@ -125,47 +129,18 @@ router.post("/add/:word/:lang", async (req, res) => {
 router.post("/add/:word/:lang/:def", async (req, res) => {
     try {
         const { word, lang, def } = req.params;
-  
-        // Vérifier si le mot existe déjà
-        const wordExiste = await Word.findOne({ where: { word, lang } });
-        if (!wordExiste) {
-            return res.status(400).json({ error: "Ce mot n'existe pas !" });
-        }
-        
-        // Vérifier si la définition existe déjà
-        let existingDef = await sequelize.query(
-            `SELECT id FROM definition WHERE definition = ?`,
-            [def]
-        );
-        
+       
         let defId;
         let createdDef = false;
         
-        if (existingDef.length === 0) {
-            // Créer la définition
-            await sequelize.query(
-                `INSERT INTO definition (definition, source) VALUES (?, 'user')`,
-                [def]
-            );
-            defId = await sequelize.getInsertId();
-            createdDef = true;
-        } else {
-            defId = existingDef[0].id;
-        }
-        
-        // Vérifier si l'association existe déjà
-        const existingAssoc = await sequelize.query(
-            `SELECT * FROM word_definition WHERE \`w-id\` = ? AND \`d-id\` = ?`,
-            [wordExiste.id, defId]
-        );
-        
-        if (existingAssoc.length === 0) {
-            // Créer l'association
-            await sequelize.query(
-                `INSERT INTO word_definition (\`w-id\`, \`d-id\`) VALUES (?, ?)`,
-                [wordExiste.id, defId]
-            );
-        }
+        let [wordEntry] = await Word.findOrCreate({ where: { word, lang } });
+                
+        let definitionEntry;
+        [definitionEntry, createdDef] = await Definition.findOrCreate({ where: { definition, source } });
+
+        await WordDefinition.findOrCreate({
+            where: { 'w-id': wordEntry.id, 'd-id': definitionEntry.id }
+        });
 
         // Message de retour
         let message = createdDef 

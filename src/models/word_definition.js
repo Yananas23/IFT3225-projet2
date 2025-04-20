@@ -11,27 +11,42 @@ const WordDefinition = sequelize.define("word_definition", {
 
 // Méthodes spécifiques pour le modèle WordDefinition
 WordDefinition.findOne = async function({ where }) {
-  const whereClause = Object.entries(where)
-    .map(([key, value]) => `\`${key}\` = ?`)
-    .join(" AND ");
-  
-  const results = await sequelize.query(
-    `SELECT * FROM word_definition WHERE ${whereClause}`,
-    Object.values(where)
-  );
-  
-  return results.length > 0 ? results[0] : null;
+  try {
+    const whereClause = Object.entries(where)
+      .map(([key, value]) => `\`${key}\` = ?`)
+      .join(" AND ");
+    
+    const results = await sequelize.query(
+      `SELECT * FROM word_definition WHERE ${whereClause}`,
+      Object.values(where)
+    );
+    
+    return results && results.length > 0 ? results[0] : null;
+  } catch (error) {
+    console.error("Erreur dans WordDefinition.findOne:", error);
+    return null;
+  }
 };
 
 WordDefinition.findOrCreate = async function({ where }) {
-  const existingRecord = await this.findOne({ where });
-  
-  if (existingRecord) {
-    return [existingRecord, false];
+  try {
+    // Vérifiez d'abord que les IDs existent et sont valides
+    if (!where['w-id'] || !where['d-id'] || where['w-id'] === '0' || where['d-id'] === '0') {
+      throw new Error("IDs invalides pour word_definition");
+    }
+    
+    const existingRecord = await this.findOne({ where });
+    
+    if (existingRecord) {
+      return [existingRecord, false];
+    }
+    
+    const newRecord = await this.create(where);
+    return [newRecord, true];
+  } catch (error) {
+    console.error("Erreur dans WordDefinition.findOrCreate:", error);
+    throw error;
   }
-  
-  const newRecord = await this.create(where);
-  return [newRecord, true];
 };
 
 WordDefinition.create = async function(data) {

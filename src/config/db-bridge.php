@@ -65,8 +65,40 @@ switch ($action) {
             try {
                 $stmt = $pdo->prepare($request['sql']);
                 $stmt->execute($request['params']);
+
                 $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
-                echo json_encode(['success' => true, 'data' => $data]);
+                $insertId = null;
+
+                // Si c'est une insertion, on génère dynamiquement la requête pour retrouver l'ID
+                if (
+                    stripos($request['sql'], 'INSERT INTO') === 0 
+                ) {
+                    // Extraction du nom de la table et des colonnes
+                    if (preg_match('/INSERT INTO\s+(\w+)\s*\(([^)]+)\)/i', $request['sql'], $matches)) {
+                        $table = $matches[1];
+                        if ($table != "word_definition") {
+                            $columns = array_map('trim', explode(',', $matches[2]));
+
+                            // Création d'une requête SELECT dynamique
+                            $conditions = implode(' AND ', array_map(fn($col) => "$col = ?", $columns));
+                            $idQuery = "SELECT id FROM $table WHERE $conditions ORDER BY id DESC LIMIT 1";
+
+                            $idStmt = $pdo->prepare($idQuery);
+                            $idStmt->execute($request['params']);
+                            $idResult = $idStmt->fetch(PDO::FETCH_ASSOC);
+
+                            if ($idResult && isset($idResult['id'])) {
+                                $insertId = $idResult['id'];
+                            }
+                        }
+                    }
+                }
+
+                echo json_encode([
+                    'success' => true,
+                    'data' => $data,
+                    'insertId' => $insertId
+                ]);
             } catch (PDOException $e) {
                 http_response_code(500);
                 echo json_encode(['error' => 'Erreur lors de l’exécution de la requête', 'details' => $e->getMessage()]);

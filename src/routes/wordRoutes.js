@@ -87,23 +87,25 @@ async function handleDefRequest(req, res) {
         let from = parseInt(req.params.from, 10);
 
         // Requête pour récupérer les mots avec pagination
-        const words = await sequelize.query(
-            `SELECT id, word FROM word LIMIT ? OFFSET ?`, 
-            [nb, from - 1]
+        const results = await sequelize.query(
+            `SELECT * FROM word LIMIT ${nb} OFFSET ${from - 1}`, 
+            []
         );
-
+	    const words = results.data;
         const result = [];
 
         // Pour chaque mot, récupérer ses définitions
         for (const word of words) {
             // Récupérer les définitions associées au mot
-            const definitions = await sequelize.query(
+            const definitionsResult = await sequelize.query(
                 `SELECT d.definition 
                  FROM definition d
                  JOIN word_definition wd ON d.id = wd.\`d-id\`
                  WHERE wd.\`w-id\` = ?`,
                 [word.id]
             );
+
+	const definitions = definitionsResult.data;
 
             result.push({
                 word: word.word,
