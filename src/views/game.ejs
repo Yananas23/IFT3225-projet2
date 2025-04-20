@@ -49,7 +49,7 @@
         <h2 id="resultMessage"></h2>
         <p>Le mot était : <strong><%= word %></strong></p>
         <p>Votre score final est : <strong><span id="finalScore"><%= score %></span></strong> points</p>
-        <a href="." class="btn btn-primary mt-3">Jouer à nouveau?</a>
+        <button id="replayBtn" class="btn btn-primary mt-3">Jouer à nouveau ?</button>
     </div>
 </div>
 
@@ -74,6 +74,10 @@
         }
         document.getElementById('wordDisplay').innerHTML = wordDisplay;
     }
+
+    document.getElementById("replayBtn").addEventListener("click", function() {
+        location.reload();
+    });
 
     // Met à jour le score et affiche un message si le mot est trouvé
     function updateScoreAndCheckWin(letter) {

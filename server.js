@@ -13,10 +13,6 @@ const adminRoutes = require("./src/routes/adminRoutes");
 const wordRoutes = require("./src/routes/wordRoutes");
 const dumpRoute = require("./src/routes/dumpRoute");
 
-const Word = require("./src/models/word");
-const WordDefinition = require("./src/models/word_definition");
-const Definition = require("./src/models/definition");
-
 const app = express();
 const PORT = process.env.PORT || 5000;
 

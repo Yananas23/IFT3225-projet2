@@ -1,6 +1,6 @@
 const express = require("express");
-const Joueur = require("../models/joueur");
 const sequelize = require("../config/database");
+const Joueur = require("../models/joueur");
 const Word = require("../models/word");
 const Definition = require("../models/definition");
 const WordDefinition = require("../models/word_definition");
@@ -63,7 +63,13 @@ router.get("/def/:lg?/:time?", async (req, res) => {
         let score = null;
 
         if (pseudo) {
-            const joueur = await Joueur.findOne({ where: { pseudo } });
+            // Par une requête SQL manuelle :
+            const joueurResponse = await sequelize.query(
+                `SELECT * FROM joueur WHERE pseudo = ?`,
+                [pseudo]
+              );
+            
+            const joueur = joueurResponse[0]; // Le premier élément du tableau retourné (si un joueur existe)
             score = joueur?.score ?? null;
         }
 
@@ -88,8 +94,8 @@ router.get("/def/:lg?/:time?", async (req, res) => {
 router.post("/def/:wordId", async (req, res) => {
     try {
         const { wordId } = req.params;
-        const defs = Array.isArray(req.body.definition)
-            ? req.body.definition
+        const defs = Array.isArray(req.body.definition) 
+            ? req.body.definition 
             : [req.body.definition];
 
         console.log("Données reçues dans le POST /def/:wordId:");
@@ -98,15 +104,27 @@ router.post("/def/:wordId", async (req, res) => {
         console.log("Définitions soumises:", defs);
 
         const pseudo = req.session.joueur?.pseudo || "anonyme";
-        const word = await Word.findByPk(wordId);
-        if (!word) return res.status(404).send("Mot non trouvé.");
 
-        const existingDefs = await Definition.findAll({
-            include: {
-                model: Word,
-                where: { id: wordId }
-            }
-        });
+        // Requête SQL manuelle pour récupérer le mot avec son ID
+        const wordData = await sequelize.query(
+            `SELECT * FROM word WHERE id = ?`, 
+            [wordId]
+        );
+
+        if (!wordData || wordData.length === 0) {
+            return res.status(404).send("Mot non trouvé.");
+        }        
+
+        // Requête SQL manuelle pour récupérer les définitions existantes
+        const existingDefsResponse = await sequelize.query(
+            `SELECT * FROM definition d 
+             JOIN word_definition wd ON d.id = wd.\`d-id\` 
+             WHERE wd.\`w-id\` = ?`, [wordId]
+        );
+
+        const existingDefs = existingDefsResponse.data;
+
+        // Créer un ensemble des définitions déjà existantes (pour éviter les doublons)
         const existingTexts = new Set(existingDefs.map(def => def.definition.toLowerCase()));
 
         let validDefs = 0;
@@ -115,19 +133,38 @@ router.post("/def/:wordId", async (req, res) => {
                 // Si la définition est invalide (null, undefined ou vide), on la saute
                 continue;
             }
-            
+
             const text = def.trim();
             if (text.length < 5 || text.length > 200) continue;
             if (existingTexts.has(text.toLowerCase())) continue;
 
-            const newDef = await Definition.create({ definition: text, source: pseudo });
-            await WordDefinition.create({ 'w-id': word.id, 'd-id': newDef.id });
+            // Si la définition est valide, on l'ajoute à la base de données
+            const newDefResponse = await sequelize.query(
+                `INSERT INTO definition (definition, source) VALUES (?, ?)`,
+                [text, pseudo]
+            );
+
+            const newDefId = newDefResponse.insertId;
+            console.log("Def response! ", newDefId)
+
+            // Création de l'association entre le mot et la définition
+            await sequelize.query(
+                `INSERT INTO word_definition (\`w-id\`, \`d-id\`) VALUES (?, ?)`,
+                [wordId, newDefId],
+            );
+
             validDefs++;
         }
 
         let updatedScore = null;
         if (req.session.joueur && validDefs > 0) {
-            const joueur = await Joueur.findOne({ where: { pseudo } });
+            // Par une requête SQL manuelle :
+            const joueurResponse = await sequelize.query(
+                `SELECT * FROM joueur WHERE pseudo = ?`,
+                [pseudo]
+            );
+            
+            const joueur = joueurResponse[0];
             updatedScore = joueur.score + validDefs * 5;
             await Joueur.update({ score: updatedScore }, { where: { pseudo } });
             req.session.joueur.score = updatedScore;
@@ -148,6 +185,7 @@ router.post("/def/:wordId", async (req, res) => {
     }
 });
 
+
 // FONCTIONS
 
 function authRequired(req, res, next) {
@@ -157,6 +195,9 @@ function authRequired(req, res, next) {
     next();
 }
 
+
+/*
+// getRandomWord pour sequelize seulement
 async function getRandomWord(lang = "en") {
     try {
         const words = await Word.findAll({
@@ -186,6 +227,47 @@ async function getRandomWord(lang = "en") {
         return null;
     }
 }
+*/
+
+async function getRandomWord(lang = "en") {
+    try {
+        // Récupérer tous les mots de la langue
+        const words = await Word.findAll({ where: { lang } });
+        if (!words || words.length === 0) return null;
+
+        // On prend l’id des mots trouvés
+        const wordIds = words.data.map(w => w.id);
+
+        // Aller chercher les définitions pour ces mots
+        const definitionsRaw = await sequelize.query(
+            `SELECT w.id as wordId, w.word, d.id as definitionId, d.definition
+             FROM word w
+             JOIN word_definition wd ON w.id = wd.\`w-id\`
+             JOIN definition d ON d.id = wd.\`d-id\`
+             WHERE w.lang = ?`,
+            [lang]
+        );
+
+        const defs = definitionsRaw.data;
+
+        if (defs.length === 0) return null;
+
+        // Choisir un mot/définition aléatoire
+        const random = defs[Math.floor(Math.random() * defs.length)];
+
+        return {
+            word: random.word,
+            wordId: random.wordId,
+            definition: random.definition,
+            definitionId: random.definitionId
+        };
+
+    } catch (err) {
+        console.error("Erreur dans getRandomWord :", err);
+        return null;
+    }
+}
+
 
 
 module.exports = router;
