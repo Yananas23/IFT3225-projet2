@@ -1,6 +1,7 @@
 const express = require("express");
 const Joueur = require("../models/joueur");
 const sequelize = require("../config/database");
+const sequelize = require("../config/database");
 const Word = require("../models/word");
 const Definition = require("../models/definition");
 const WordDefinition = require("../models/word_definition");
@@ -11,7 +12,10 @@ const router = express.Router();
 router.get("/play/:pseudo", async (req, res) => {
     try {
         const { pseudo } = req.params;
+        const { pseudo } = req.params;
 
+        // Vérifier si le joueur existe
+        const joueur = await Joueur.findOne({ where: { pseudo } });
         // Vérifier si le joueur existe
         const joueur = await Joueur.findOne({ where: { pseudo } });
 
@@ -27,7 +31,20 @@ router.get("/play/:pseudo", async (req, res) => {
         );
 
         res.json({ message: "Partie enregistrée avec succès", games: newGameCount });
+        if (!joueur) {
+            return res.status(404).json({ error: "Joueur non trouvé" });
+        }
+
+        // Incrémenter le nombre de parties jouées
+        const newGameCount = joueur.game + 1;
+        await sequelize.query(
+            `UPDATE joueur SET game = ? WHERE pseudo = ?`,
+            [newGameCount, pseudo]
+        );
+
+        res.json({ message: "Partie enregistrée avec succès", games: newGameCount });
     } catch (error) {
+        console.error(error);
         console.error(error);
         res.status(500).json({ error: error.message });
     }
@@ -35,6 +52,10 @@ router.get("/play/:pseudo", async (req, res) => {
 
 router.put("/win/:pseudo", async (req, res) => {
     try {
+        const { pseudo } = req.params;
+
+        // Vérifier si le joueur existe
+        const joueur = await Joueur.findOne({ where: { pseudo } });
         const { pseudo } = req.params;
 
         // Vérifier si le joueur existe
@@ -52,7 +73,20 @@ router.put("/win/:pseudo", async (req, res) => {
         );
 
         res.json({ message: "Victoire enregistrée avec succès", wins: newWinCount });
+        if (!joueur) {
+            return res.status(404).json({ error: "Joueur non trouvé" });
+        }
+
+        // Incrémenter le nombre de victoires
+        const newWinCount = joueur.win + 1;
+        await sequelize.query(
+            `UPDATE joueur SET win = ? WHERE pseudo = ?`,
+            [newWinCount, pseudo]
+        );
+
+        res.json({ message: "Victoire enregistrée avec succès", wins: newWinCount });
     } catch (error) {
+        console.error(error);
         console.error(error);
         res.status(500).json({ error: error.message });
     }
@@ -61,6 +95,10 @@ router.put("/win/:pseudo", async (req, res) => {
 router.put("/score/:pseudo/:pts", async (req, res) => {
     try {
         const { pseudo, pts } = req.params;
+        const points = parseInt(pts, 10);
+
+        // Vérifier si le joueur existe
+        const joueur = await Joueur.findOne({ where: { pseudo } });
         const points = parseInt(pts, 10);
 
         // Vérifier si le joueur existe
@@ -78,7 +116,20 @@ router.put("/score/:pseudo/:pts", async (req, res) => {
         );
 
         res.json({ message: "Score mis à jour avec succès", score: newScore });
+        if (!joueur) {
+            return res.status(404).json({ error: "Joueur non trouvé" });
+        }
+
+        // Mettre à jour le score
+        const newScore = joueur.score + points;
+        await sequelize.query(
+            `UPDATE joueur SET score = ? WHERE pseudo = ?`,
+            [newScore, pseudo]
+        );
+
+        res.json({ message: "Score mis à jour avec succès", score: newScore });
     } catch (error) {
+        console.error(error);
         console.error(error);
         res.status(500).json({ error: error.message });
     }
@@ -126,12 +177,14 @@ router.get("/word/:lg?/:time?/:hint?", async (req, res) => {
 });
 
 router.get("/def/:lg?/:time?", async (req, res) => {
+router.get("/def/:lg?/:time?", async (req, res) => {
     try {
         const lang = req.params.lg || "en";
         const time = parseInt(req.params.time, 10) || 60;
 
         const wordData = await getRandomWord(lang);
         if (!wordData) {
+            return res.status(404).send("Aucun mot trouvé.");
             return res.status(404).send("Aucun mot trouvé.");
         }
 
@@ -146,9 +199,15 @@ router.get("/def/:lg?/:time?", async (req, res) => {
         res.render("def", {
             layout: "layout",
             title: "Jeu des définitions",
+            title: "Jeu des définitions",
             word: wordData.word,
             wordId: wordData.wordId,
+            wordId: wordData.wordId,
             language: lang,
+            time,
+            isConnected: !!pseudo,
+            pseudo,
+            globalScore: score
             time,
             isConnected: !!pseudo,
             pseudo,
@@ -157,10 +216,14 @@ router.get("/def/:lg?/:time?", async (req, res) => {
 
     } catch (err) {
         console.error("Erreur dans /def :", err);
+
+    } catch (err) {
+        console.error("Erreur dans /def :", err);
         res.status(500).send("Erreur lors de la génération de la partie.");
     }
 });
 
+router.post("/def/:wordId", async (req, res) => {
 router.post("/def/:wordId", async (req, res) => {
     try {
         const { wordId } = req.params;
@@ -218,6 +281,9 @@ router.post("/def/:wordId", async (req, res) => {
             isConnected: !!req.session.joueur
         });
 
+    } catch (err) {
+        console.error(err);
+        res.status(500).send("Erreur lors de la soumission.");
     } catch (err) {
         console.error(err);
         res.status(500).send("Erreur lors de la soumission.");

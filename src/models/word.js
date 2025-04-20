@@ -1,40 +1,107 @@
-const { Sequelize, DataTypes, Model } = require("sequelize");
+// word.js adapté pour PHPBridge
 const sequelize = require("../config/database");
 
-class Word extends Model {}
+// Création d'un modèle "word" avec l'émulation PHPBridge
+const Word = sequelize.define("word", {
+  id: "INTEGER",
+  word: "STRING",
+  lang: "STRING"
+});
 
-Word.init(
-  {
-    id: {
-      autoIncrement: true,
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      primaryKey: true,
-    },
-    word: {
-      type: DataTypes.STRING(50),
-      allowNull: false,
-    },
-    lang: {
-      type: DataTypes.STRING(10),
-      allowNull: false,
-    },
-  },
-  {
-    sequelize,
-    tableName: "word",
-    timestamps: false,
-    modelName: "Word",
-    indexes: [
-      {
-        name: "PRIMARY",
-        unique: true,
-        using: "BTREE",
-        fields: ["id"],
-      },
-    ],
+// Méthodes spécifiques pour le modèle Word
+Word.findOne = async function({ where }) {
+  try {
+    const key = Object.keys(where)[0];
+    const value = Object.values(where)[0];
+    
+    const results = await sequelize.query(
+      `SELECT * FROM word WHERE ${key} = ?`, 
+      [value]
+    );
+    
+    // Toujours vérifier si results existe et a au moins un élément
+    return results && results.length > 0 ? results[0] : null;
+  } catch (error) {
+    console.error("Erreur dans Word.findOne:", error);
+    return null;
   }
-);
+}
+
+Word.findAll = async function(options = {}) {
+  let sql = "SELECT * FROM word";
+  const params = [];
+  
+  if (options.where) {
+    sql += " WHERE ";
+    const clauses = [];
+    
+    for (const [key, value] of Object.entries(options.where)) {
+      clauses.push(`${key} = ?`);
+      params.push(value);
+    }
+    
+    sql += clauses.join(" AND ");
+  }
+  
+  if (options.limit) {
+    sql += ` LIMIT ${options.limit}`;
+  }
+  
+  if (options.offset !== undefined) {
+    sql += ` OFFSET ${options.offset}`;
+  }
+  
+  return sequelize.query(sql, params);
+};
+
+Word.findOrCreate = async function({ where }) {
+  try {
+    // D'abord, essayez de trouver l'enregistrement
+    const existingRecord = await this.findOne({ where });
+    
+    // Si trouvé, retournez-le dans un tableau (pour compatibilité avec Sequelize)
+    if (existingRecord) {
+      return [existingRecord, false]; // false indique qu'il n'a pas été créé
+    }
+    
+    // Sinon, créez un nouvel enregistrement
+    const newRecord = await this.create(where);
+    return [newRecord, true]; // true indique qu'il a été créé
+  } catch (error) {
+    console.error("Erreur dans findOrCreate:", error);
+    throw error;
+  }
+};
+
+Word.create = async function(data) {
+  const fields = Object.keys(data).join(", ");
+  const placeholders = Object.keys(data).map(() => "?").join(", ");
+  const values = Object.values(data);
+
+  // Insertion
+  await sequelize.query(
+    `INSERT INTO word (${fields}) VALUES (${placeholders})`,
+    values
+  );
+
+  // Générer la clause WHERE pour retrouver l'élément inséré
+  const whereClause = Object.keys(data)
+    .map(field => `${field} = ?`)
+    .join(" AND ");
+
+  const selectQuery = `
+    SELECT id FROM word 
+    WHERE ${whereClause} 
+    ORDER BY id DESC 
+    LIMIT 1
+  `;
+
+  const results = await sequelize.query(selectQuery, values);
+
+  const insertId = results?.data[0]['id'];
+
+  return { id: insertId, ...data };
+};
 
 
 module.exports = Word;

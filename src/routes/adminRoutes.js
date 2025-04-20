@@ -1,8 +1,9 @@
 const express = require("express");
 const Joueur = require("../models/joueur");
 const Word = require("../models/word");
-const Word_Definition = require("../models/word_definition");
+const WordDefinition = require("../models/word_definition");
 const Definition = require("../models/definition");
+const sequelize = require("../config/database");
 
 const router = express.Router();
 
@@ -28,45 +29,76 @@ router.get("/top/:nb", async (req, res) => {
 async function handleTopRequest(req, res) {
     try {
         let nb = parseInt(req.params.nb, 10);
-        const joueurs = await Joueur.findAll();
+        
+        // Récupérer tous les joueurs triés par score décroissant avec limite
+        const joueursResult = await sequelize.query(
+            `SELECT pseudo, score FROM joueur ORDER BY score DESC LIMIT ?`,
+            [nb]
+        );
 
-        // Trier les joueurs par score décroissant et prendre les `nb` premiers
-        const topJoueurs = joueurs
-        .sort((a, b) => b.score - a.score) // Tri du plus grand au plus petit score
-        .slice(0, nb + 1); // Sélection des `nb` premiers
+        const joueurs = joueursResult.data;
 
         res.json({
-            joueurs: topJoueurs.map(j => ({ pseudo: j.pseudo, score: j.score }))
+            joueurs: joueurs.map(j => ({ pseudo: j.pseudo, score: j.score }))
         });
     } catch (error) {
+        console.error(error);
         res.status(500).json({ error: error.message });
     }
-};
+}
 
 router.delete("/delete/joueur/:joueur", async (req, res) => {
     try {
-        const deleted = await Joueur.destroy({ where: { pseudo: req.params.joueur } });
-
-        if (deleted) {
-        return res.json({ message: 'Élément supprimé avec succès' });
-        } else {
-        return res.status(404).json({ message: 'Élément non trouvé' });
+        // Vérifier si le joueur existe
+        const joueur = await Joueur.findOne({ where: { pseudo: req.params.joueur } });
+        
+        if (!joueur) {
+            return res.status(404).json({ message: 'Élément non trouvé' });
         }
+        
+        // Supprimer le joueur
+        await sequelize.query(
+            `DELETE FROM joueur WHERE pseudo = ?`,
+            [req.params.joueur]
+        );
+
+        return res.json({ message: 'Élément supprimé avec succès' });
     } catch (error) {
+        console.error(error);
         res.status(500).json({ error: error.message });
     }
 });
 
 router.delete("/delete/def/:id", async (req, res) => {
     try {
-        const deleted = await Definition.destroy({ where: { id: req.params.id } });
+        // Vérifier si la définition existe
+        const definitionId = parseInt(req.params.id, 10);
+        const definitionResult = await sequelize.query(
+            `SELECT id FROM definition WHERE id = ?`,
+            [definitionId]
+        );
+        
+        const definition = definitionResult.data;
 
-        if (deleted) {
-        return res.json({ message: 'Élément supprimé avec succès' });
-        } else {
-        return res.status(404).json({ message: 'Élément non trouvé' });
+        if (definition.length === 0) {
+            return res.status(404).json({ message: 'Élément non trouvé' });
         }
+        
+        // Supprimer d'abord les liens dans word_definition
+        await sequelize.query(
+            `DELETE FROM word_definition WHERE \`d-id\` = ?`,
+            [definitionId]
+        );
+        
+        // Puis supprimer la définition
+        await sequelize.query(
+            `DELETE FROM definition WHERE id = ?`,
+            [definitionId]
+        );
+
+        return res.json({ message: 'Élément supprimé avec succès' });
     } catch (error) {
+        console.error(error);
         res.status(500).json({ error: error.message });
     }
 });
@@ -78,18 +110,18 @@ router.post("/add/:word/:lang", async (req, res) => {
         // Vérifier si le mot existe déjà
         const wordExiste = await Word.findOne({ where: { word, lang } });
         if (wordExiste) {
-          return res.status(400).json({ error: "Ce mot existe déjà !" });
+            return res.status(400).json({ error: "Ce mot existe déjà !" });
         }
     
         // Créer le mot
         const newWord = await Word.create({
-          word,
-          lang,
+            word,
+            lang,
         });
   
         res.json({ id: newWord.id, word: newWord.word, message: "Mot ajouté !" });
-  
     } catch (error) {
+        console.error(error);
         res.status(500).json({ error: error.message });
     }
 });
@@ -97,25 +129,17 @@ router.post("/add/:word/:lang", async (req, res) => {
 router.post("/add/:word/:lang/:def", async (req, res) => {
     try {
         const { word, lang, def } = req.params;
-  
-        // Vérifier si le mot existe déjà
-        const wordExiste = await Word.findOne({ where: { word, lang } });
-        if (!wordExiste) {
-          return res.status(400).json({ error: "Ce mot n'existe pas !" });
-        }
-    
-        // Vérifier si la définition existe déjà
-        const [newDef, createdDef] = await Definition.findOrCreate({
-            where: { def },
-            defaults: { def }  // Permet de créer la définition si elle n'existe pas
-        });
+       
+        let defId;
+        let createdDef = false;
+        
+        let [wordEntry] = await Word.findOrCreate({ where: { word, lang } });
+                
+        let definitionEntry;
+        [definitionEntry, createdDef] = await Definition.findOrCreate({ where: { definition, source } });
 
-        // Vérifier si l'association existe déjà
-        const [association, createdAssoc] = await WordDefinition.findOrCreate({
-            where: {
-                wordId: wordExiste.id,
-                definitionId: newDef.id
-            }
+        await WordDefinition.findOrCreate({
+            where: { 'w-id': wordEntry.id, 'd-id': definitionEntry.id }
         });
 
         // Message de retour
@@ -124,16 +148,14 @@ router.post("/add/:word/:lang/:def", async (req, res) => {
             : `Définition déjà existante, lien mis à jour avec ${word} !`;
 
         res.json({ 
-            id: newDef.id, 
-            definition: newDef.def, 
+            id: defId, 
+            definition: def, 
             message 
         });
-  
     } catch (error) {
+        console.error(error);
         res.status(500).json({ error: error.message });
     }
 });
-
-
 
 module.exports = router;
