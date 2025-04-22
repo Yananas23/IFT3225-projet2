@@ -108,7 +108,7 @@ Word.create = async function(data) {
   return { id: insertId, ...data };
 };
 
-Word.FindSuggestion = async function (word, lang, letterID = []) {
+Word.FindSuggestion = async function (word, lang, letterList = []) {
   function shuffleArray(array) {
     for (let i = array.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
@@ -117,7 +117,7 @@ Word.FindSuggestion = async function (word, lang, letterID = []) {
     return array;
   }
 
-  const regex = await Word.regex(word, letterID);
+  const regex = await Word.regex(word, letterList);
   let values = [regex, lang, word];
   let suggestion;
 
@@ -146,17 +146,18 @@ Word.FindSuggestion = async function (word, lang, letterID = []) {
   return suggestion;
 }
 
-Word.regex = async function (word, letterID = []) {
+Word.regex = async function (word, letterList = []) {
   let regex = "^";
   let gap = 0;
 
   for (let i = 0; i < word.length; i++) {
-    if (letterID.includes(i)) {
+    const letter = word[i];
+    if (letterList.includes(letter)) {
       if (i > 0) {
         regex += ".{" + gap + "}";
         gap = 0;
       }
-      regex += word[i];
+      regex += letter;
     } else {
       gap += 1;
     }
