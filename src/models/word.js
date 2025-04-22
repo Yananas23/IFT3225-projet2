@@ -108,5 +108,66 @@ Word.create = async function(data) {
   return { id: insertId, ...data };
 };
 
+Word.FindSuggestion = async function (word, lang, letterID = []) {
+  function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [array[i], array[j]] = [array[j], array[i]]; // échange
+    }
+    return array;
+  }
+
+  const regex = await Word.regex(word, letterID);
+  let values = [regex, lang, word];
+  let suggestion;
+
+  const selectQuery = `
+    SELECT * FROM word 
+    WHERE word 
+    COLLATE utf8mb4_general_ci 
+    REGEXP ?
+    AND lang = ? 
+    AND not word = ?
+  `;
+
+  let results = await sequelize.query(selectQuery, values);
+  results = results?.data;
+
+  const words = results.map(item => item.word);
+
+  const shuffleWords = shuffleArray(words);
+  if (shuffleWords.length > 4){
+    const reducedShuffle = shuffleWords.slice(0, 4);
+    suggestion = shuffleArray(reducedShuffle);  
+  } else {
+    suggestion = shuffleArray(shuffleWords); 
+  }
+
+  return suggestion;
+}
+
+Word.regex = async function (word, letterID = []) {
+  let regex = "^";
+  let gap = 0;
+
+  for (let i = 0; i < word.length; i++) {
+    if (letterID.includes(i)) {
+      if (i > 0) {
+        regex += ".{" + gap + "}";
+        gap = 0;
+      }
+      regex += word[i];
+    } else {
+      gap += 1;
+    }
+  }
+
+  if (gap > 0) {
+    regex += ".{" + gap + "}";
+  }
+  
+  regex += "$";
+  return regex;
+}
 
 module.exports = Word;
