@@ -44,6 +44,18 @@ app.use("/admin", adminRoutes);
 app.use("/word", wordRoutes);
 app.use("/dump", dumpRoute);
 
+// Route pour afficher le contenu du fichier help.html
+app.get("/doc", (req, res) => {
+  const filePath = path.join(__dirname, 'help.html');
+  
+  fs.readFile(filePath, 'utf8', (err, data) => {
+    if (err) {
+      return res.status(404).send("Fichier d'aide non trouvé");
+    }
+    res.type('html').send(data);
+  });
+});
+
 
 // Attendre la synchronisation avant de démarrer le serveur
 sequelize.sync()
