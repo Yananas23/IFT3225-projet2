@@ -37,6 +37,9 @@ app.use(express.json());
 // Middleware pour que Express puisse lire les données d’un formulaire POST
 app.use(express.urlencoded({ extended: true }));
 
+// Pour servir le dossier '/pagescripts'
+app.use("/pagescripts", express.static(path.join(__dirname, 'src', 'pagescripts')));
+
 // Enregistrer les routes
 app.use("/gamers", joueurRoutes);
 app.use("/jeu", gameRoutes);
@@ -46,13 +49,8 @@ app.use("/dump", dumpRoute);
 
 // Route pour afficher le contenu du fichier help.html
 app.get("/doc", (req, res) => {
-  const filePath = path.join(__dirname, 'help.html');
-  
-  fs.readFile(filePath, 'utf8', (err, data) => {
-    if (err) {
-      return res.status(404).send("Fichier d'aide non trouvé");
-    }
-    res.type('html').send(data);
+  res.render("doc", {
+    title: "Documentation :",
   });
 });
 

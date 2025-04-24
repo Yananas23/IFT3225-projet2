@@ -10,192 +10,75 @@
         <%= pseudo !== "anonyme" ? pseudo : "Joueur anonyme" %>
       </p>
     </div>
-  </div>
+</div>
 
 <!-- Titre -->
 <h1 class="text-center mt-4">Jeu de mots</h1>
 
 <!-- Container principal pour le jeu -->
-<div id="gameContainer" class="d-flex justify-content-center flex-column align-items-center">
-    <div id="gameInterface" class="text-center">
-        <!-- Définition du mot -->
-        <h3>Définition du mot :</h3>
-        <p><%= definition %></p>
-        
-        <h2>Mot à deviner :</h2>
-        <div id="wordDisplay" class="mb-3">
-            <% for (let i = 0; i < word.length; i++) { %>
-                <span class="letter" id="letter-<%= i %>">_</span>
-            <% } %>
+<div id="gameContainer" class="container-fluid mt-3">
+    <div class="row">
+        <div class="col-md-3">
+            <!-- Résultats du jeu -->
+            <div id="gameResults" style="display: none;" class="text-center mt-4">
+                <h2 id="resultMessage"></h2>
+                <p>Le mot était : <strong><%= word %></strong></p>
+                <p>Votre score final est : <strong><span id="finalScore"><%= score %></span></strong> points</p>
+                <button id="replayBtn" class="btn btn-primary mt-3">Jouer à nouveau ?</button>
+            </div>
+        </div>        
+        <!-- Colonne principale du jeu (jeu de mots) -->
+        <div id="gameInterface" class="col-md-6 d-flex flex-column align-items-center text-center">
+            <!-- Définition du mot -->
+            <h3>Définition du mot :</h3>
+            <p><%= definition %></p>
+            
+            <h2>Mot à deviner :</h2>
+            <div id="wordDisplay" class="mb-3">
+                <% for (let i = 0; i < word.length; i++) { %>
+                    <span class="letter" id="letter-<%= i %>">_</span>
+                <% } %>
+            </div>
+            
+            <h3>Score : <span id="score"><%= score %></span> points</h3>
+
+            <!-- Timer -->
+            <div id="timer-container">
+                <p id="timer">⏳ Temps restant : <strong><%= timeLimit %></strong> secondes</p>
+            </div>
+
+            <!-- Formulaire pour tenter une lettre -->
+            <form id="guessForm" action="javascript:void(0);" class="mt-3">
+                <label for="letter">Saisir une lettre :</label>
+                <input type="text" id="letter" maxlength="1" required class="form-control w-25 mx-auto">
+                <button type="submit" class="btn btn-primary mt-2">Essayer</button>
+            </form>
         </div>
-        
-        <h3>Score : <span id="score"><%= score %></span> points</h3>
 
-        <!-- Timer -->
-        <div id="timer-container">
-            <p id="timer">⏳ Temps restant : <strong><%= timeLimit %></strong> secondes</p>
+        <!-- Colonne pour les suggestions (à droite du jeu) -->
+        <div class="col-md-3">
+            <!-- Icône pour afficher les suggestions (initialement masquée) -->
+            <div id="suggestionIcon" class="mt-3" style="display: none; cursor: pointer;">
+                <i class="fas fa-search text-info" style="font-size: 24px;"></i>
+                <small class="text-muted">Afficher les suggestions (−20 points)</small>
+            </div>
+
+            <!-- Liste des suggestions possibles (cachée au début) -->
+            <div id="suggestionBox" class="mt-3" style="display: none;">
+                <h4>Suggestions possibles :</h4>
+                <ul id="suggestionList" class="list-unstyled"></ul>
+            </div>
         </div>
-
-        <!-- Formulaire pour tenter une lettre -->
-        <form id="guessForm" action="javascript:void(0);" class="mt-3">
-            <label for="letter">Saisir une lettre :</label>
-            <input type="text" id="letter" maxlength="1" required class="form-control w-25 mx-auto">
-            <button type="submit" class="btn btn-primary mt-2">Essayer</button>
-        </form>
-    </div> <!-- End of gameInterface -->
-
-    <!-- Résultats du jeu -->
-    <div id="gameResults" style="display: none;" class="text-center mt-4">
-        <h2 id="resultMessage"></h2>
-        <p>Le mot était : <strong><%= word %></strong></p>
-        <p>Votre score final est : <strong><span id="finalScore"><%= score %></span></strong> points</p>
-        <button id="replayBtn" class="btn btn-primary mt-3">Jouer à nouveau ?</button>
-    </div>
+    </div>    
 </div>
 
 <script>
-    let word = "<%= word %>".toLowerCase();  // Mot à deviner, converti en minuscule
-    let score = <%= score %>;  // Score actuel
-    let timeRemaining = <%= timeLimit %>;  // Temps initial du jeu
-    let guessedLetters = [];  // Tableau pour les lettres déjà devinées
-
-    // Afficher le mot à deviner dans la console
-    console.log("Mot à deviner (en minuscule) : " + word);  // Ceci affiche le mot dans la console
-
-    // Affiche le mot avec les lettres déjà devinées
-    function updateWordDisplay() {
-        let wordDisplay = '';
-        for (let i = 0; i < word.length; i++) {
-            if (guessedLetters.includes(word[i])) {
-                wordDisplay += `<span class="letter">${word[i]}</span>`;
-            } else {
-                wordDisplay += `<span class="letter">_</span>`;
-            }
-        }
-        document.getElementById('wordDisplay').innerHTML = wordDisplay;
-    }
-
-    document.getElementById("replayBtn").addEventListener("click", function() {
-        location.reload();
-    });
-
-    // Met à jour le score et affiche un message si le mot est trouvé
-    function updateScoreAndCheckWin(letter) {
-        letter = letter.toLowerCase();  // Convertir la lettre devinée en minuscule
-        console.log(`Lettre devinée : "${letter}"`);  // Affiche la lettre devinée
-        if (word.includes(letter)) {
-            score += 5;
-            guessedLetters.push(letter);
-        } else {
-            score -= 5;
-        }
-
-        // Met à jour le score
-        document.getElementById('score').textContent = score;
-
-        // Vérifie si le joueur a trouvé le mot
-        if (guessedLetters.length === word.length) {
-            // Afficher le message de victoire
-            showGameResult("Félicitations ! Vous avez trouvé le mot.");
-            clearInterval(timerInterval); // Arrêter le timer
-            clearInterval(hintInterval);  // Arrêter la révélation des indices
-            // Désactivation du formulaire et du bouton
-            const form = document.getElementById("guessForm");
-            const button = form.querySelector("button[type='submit']");
-            button.disabled = true;
-        }
-    }
-
-    // Fonction pour révéler une lettre inconnue toutes les X secondes
-    function revealHint() {
-        let hiddenLetters = [];  // Tableau des indices des lettres non devinées
-        for (let i = 0; i < word.length; i++) {
-            if (!guessedLetters.includes(word[i])) {
-                hiddenLetters.push(i);
-            }
-        }
-
-        // Si il y a des lettres non devinées, on en révèle une aléatoirement
-        if (hiddenLetters.length > 0) {
-            const randomIndex = hiddenLetters[Math.floor(Math.random() * hiddenLetters.length)];
-            const letterToReveal = word[randomIndex];
-            guessedLetters.push(letterToReveal);  // Ajouter cette lettre à la liste des lettres devinées
-            score -= 10;  // Réduire le score de 10 points à chaque indice révélé
-            updateWordDisplay();  // Mettre à jour l'affichage
-            document.getElementById('score').textContent = score;  // Mettre à jour l'affichage du score
-            console.log(`Indice révélé : ${letterToReveal}, Score réduit de 10 points.`);
-
-            // Vérifier si le mot est maintenant complet après avoir révélé une lettre
-            if (guessedLetters.length === word.length) {
-                // Afficher le message de victoire
-                showGameResult("Félicitations ! Vous avez trouvé le mot.");
-                clearInterval(timerInterval); // Arrêter le timer
-                clearInterval(hintInterval);  // Arrêter la révélation des indices
-                // Désactivation du formulaire et du bouton
-                const form = document.getElementById("guessForm");
-                const button = form.querySelector("button[type='submit']");
-                button.disabled = true;
-            }
-        }
-    }
-
-    // Fonction pour afficher le résultat du jeu
-    function showGameResult(message) {
-        const resultMessage = document.getElementById('resultMessage');
-        const gameResult = document.getElementById('gameResults');
-        const finalScore = document.getElementById('finalScore');
-
-        resultMessage.textContent = message;  // Mettre à jour le message de résultat
-        finalScore.textContent = score;  // Afficher le score final
-
-        // Afficher la section du résultat
-        gameResult.style.display = 'block';
-    }
-    
-    const hintIntervalTime = <%= hintIntervalTime %>;
-    
-    const hintInterval = setInterval(revealHint, hintIntervalTime * 1000);  // Révéler une lettre toutes les hintIntervalTime secondes
-
-    // Gestion de la soumission du formulaire
-    document.getElementById('guessForm').addEventListener('submit', function(e) {
-        e.preventDefault();  // Empêcher l'envoi du formulaire
-
-        const letterInput = document.getElementById('letter');
-        let letter = letterInput.value.trim().toLowerCase();  // Convertir la lettre saisie en minuscule
-
-        if (letter && letter.length === 1 && !guessedLetters.includes(letter)) {
-            updateScoreAndCheckWin(letter);
-            updateWordDisplay();
-        } else {
-            alert("Veuillez entrer une lettre valide qui n'a pas encore été devinée.");
-        }
-
-        // Effacer l'input après chaque tentative
-        letterInput.value = '';
-        letterInput.focus();
-    });
-    
-    const timerDisplay = document.getElementById('timer');
-    const timerInterval = setInterval(function() {
-        timeRemaining--;
-        timerDisplay.innerHTML = `⏳ Temps restant : <strong>${timeRemaining}</strong> secondes`;        
-
-        // Fin du temps
-        if (timeRemaining <= 0) {
-            clearInterval(timerInterval);
-            timerDisplay.innerHTML = "⏰ Temps écoulé !";
-            timerDisplay.style.color = "gray";
-
-            // Désactivation du formulaire à la fin du temps
-            const form = document.getElementById("guessForm");
-            const button = form.querySelector("button[type='submit']");
-            button.disabled = true;
-            // Afficher le message de fin de partie
-            showGameResult("Temps écoulé ! Vous avez perdu !");
-            clearInterval(hintInterval);  // Arrêter la révélation des indices
-        }
-    }, 1000);
-
-    // Initialiser l'affichage du mot
-    updateWordDisplay();
+    const allServerSuggestions = <%- JSON.stringify(suggestions) %>;
+    const wordFromServer = "<%= word %>".toLowerCase();
+    const scoreFromServer = <%= score %>;
+    const timeLimitFromServer = <%= timeLimit %>;
+    const hintIntervalTimeFromServer = <%= hintIntervalTime %>;
+    console.log("Liste des suggestions :", allSuggestions);
+    console.log("Mot à deviner (en minuscule) : " + wordFromServer);    
 </script>
+<script src="../pagescripts/gamescript.js"></script>

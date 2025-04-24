@@ -2,8 +2,6 @@ const express = require("express");
 const sequelize = require("../config/database");
 const Joueur = require("../models/joueur");
 const Word = require("../models/word");
-const Definition = require("../models/definition");
-const WordDefinition = require("../models/word_definition");
 
 const router = express.Router();
 
@@ -25,6 +23,8 @@ router.get("/word/:lg?/:time?/:hint?", async (req, res) => {
         const initialScore = 10 * word.length;
         let score = initialScore;
 
+        const suggestions = await Word.FindSuggestions(word, lg);
+
         // Si le joueur est connecté, on récupère son pseudo
         const pseudo = req.session.joueur?.pseudo || "anonyme";
 
@@ -40,6 +40,7 @@ router.get("/word/:lg?/:time?/:hint?", async (req, res) => {
             pseudo,
             isConnected: pseudo !== "anonyme",
             hintIntervalTime,
+            suggestions,
         });
 
     } catch (err) {

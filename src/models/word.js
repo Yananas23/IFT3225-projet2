@@ -108,7 +108,54 @@ Word.create = async function(data) {
   return { id: insertId, ...data };
 };
 
-Word.FindSuggestion = async function (word, lang, letterList = []) {
+Word.FindSuggestions = async function (targetWord, lang, maxResults = 100) {
+  try {
+    // Récupération de tous les mots qui ne sont pas égaux au mot cible
+    const results = await sequelize.query(
+      `SELECT word FROM word WHERE lang = ? AND word != ?`,
+      [lang, targetWord]
+    );
+    
+    const allWords = results?.data.map(row => row.word) || [];
+
+    let lowercaseTargetWord = targetWord.toLowerCase();
+
+    // Fonction pour vérifier si deux mots ont des lettres communes aux mêmes positions
+    function countMatchingLettersAtSamePosition(a, b) {
+      let count = 0;
+      for (let i = 0; i < a.length; i++) {
+        if (a[i] === b[i]) {
+          count++;
+        }
+      }
+      return count;
+    }
+
+    // Filtrer les mots qui ont la même longueur et qui partagent des lettres aux mêmes positions
+    const filteredWords = allWords
+      .filter(word => word.length === targetWord.length)  // Filtrer les mots de même longueur
+      .map(word => ({
+        word: word.toLowerCase(),
+        score: countMatchingLettersAtSamePosition(word, targetWord) // Calculer le nombre de lettres communes aux mêmes positions
+      }))
+      .filter(item => item.score > 0) // On garde seulement ceux avec ≥1 lettre en commun au même emplacement
+      .sort((a, b) => b.score - a.score) // Trier par pertinence
+      .map(item => item.word) // Garder uniquement les mots
+      .slice(0, maxResults); // Limiter le nombre de résultats
+
+    if (filteredWords.length === 0) {
+      return allWords.slice(0, maxResults).map(word => word.toLowerCase()); // Si rien trouvé, retourner quelques mots aléatoires en minuscule
+    }
+
+    return filteredWords;
+  } catch (error) {
+    console.error("Erreur dans FindSuggestions:", error);
+    return [];
+  }
+};
+
+/*
+Word.FindSuggestions = async function (word, lang, letterList = []) {
   function shuffleArray(array) {
     for (let i = array.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
@@ -119,7 +166,7 @@ Word.FindSuggestion = async function (word, lang, letterList = []) {
 
   const regex = await Word.regex(word, letterList);
   let values = [regex, lang, word];
-  let suggestion;
+  let suggestions;
 
   const selectQuery = `
     SELECT * FROM word 
@@ -143,8 +190,9 @@ Word.FindSuggestion = async function (word, lang, letterList = []) {
     suggestion = shuffleArray(shuffleWords); 
   }
 
-  return suggestion;
+  return suggestions;
 }
+*/
 
 Word.regex = async function (word, letterList = []) {
   let regex = "^";
