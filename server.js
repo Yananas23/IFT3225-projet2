@@ -40,6 +40,9 @@ app.use(express.urlencoded({ extended: true }));
 // Pour servir le dossier '/pagescripts'
 app.use("/pagescripts", express.static(path.join(__dirname, 'src', 'pagescripts')));
 
+// Pour servir le dossier '/style'
+app.use("/style", express.static(path.join(__dirname, 'src', 'style')));
+
 // Enregistrer les routes
 app.use("/gamers", joueurRoutes);
 app.use("/jeu", gameRoutes);

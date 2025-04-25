@@ -11,6 +11,9 @@ router.get("/word/:lg?/:time?/:hint?", async (req, res) => {
         const { lg = "en", time = 60 } = req.params;  // Langue et temps par défaut
         const hintIntervalTime = req.params.hint || 10;  // Par défaut, 10 secondes
 
+        const allowedLangs = ["en", "fr"];
+        if (!allowedLangs.includes(lg)) return res.status(400).send("Langue non supportée.");
+
         // Récupérer un mot aléatoire de la langue spécifiée
         const wordData = await getRandomWord(lg);
         if (!wordData) {

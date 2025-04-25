@@ -86,7 +86,9 @@ function revealHint() {
 
         if (!hintRevealed) {
             hintRevealed = true;
-            document.getElementById('suggestionIcon').style.display = 'block';
+            let varSuggestionIcon = document.getElementById('suggestionIcon');
+            varSuggestionIcon.classList.remove('d-none');
+            varSuggestionIcon.classList.add('d-block');
         }
 
         updateWordDisplay();  // Mettre à jour l'affichage
@@ -120,7 +122,8 @@ function showGameResult(message) {
     finalScore.textContent = score;  // Afficher le score final
 
     // Afficher la section du résultat
-    gameResult.style.display = 'block';
+    gameResult.classList.remove('d-none');
+    gameResult.classList.add('d-block');
 }
 
 const hintInterval = setInterval(revealHint, hintIntervalTime * 1000);  // Révéler une lettre toutes les hintIntervalTime secondes
@@ -153,7 +156,7 @@ const timerInterval = setInterval(function() {
     if (timeRemaining <= 0) {
         clearInterval(timerInterval);
         timerDisplay.innerHTML = "⏰ Temps écoulé !";
-        timerDisplay.style.color = "gray";
+        timerDisplay.classList.add('text-secondary');
 
         // Désactivation du formulaire à la fin du temps
         const form = document.getElementById("guessForm");
@@ -207,7 +210,13 @@ document.getElementById("suggestionIcon").addEventListener("click", function () 
         score -= 20;
         document.getElementById('score').textContent = score;
         suggestionsVisible = true;
-        document.getElementById('suggestionBox').style.display = 'block';
+        let varSuggestionBox = document.getElementById('suggestionBox');
+        varSuggestionBox.classList.remove('d-none');
+        varSuggestionBox.classList.add('d-block');
+
+        let varSuggestionIcon = document.getElementById('suggestionIcon');
+        varSuggestionIcon.classList.add('d-none');
+
         updateSuggestionList();
     } else {
         alert("Score insuffisant pour afficher des mots possibles!");

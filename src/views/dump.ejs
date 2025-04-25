@@ -1,35 +1,31 @@
-<h1><%= title %></h1>
-
-<!-- Table pour afficher toutes les définitions -->
-<table id="definitionsTable" class="display">
-  <thead>
-    <tr>
-      <th>Langue</th>
-      <th>Mot</th>
-      <th>Définition</th>
-      <th>Source</th>
-    </tr>
-  </thead>
-  <tbody>
-    <% definitions.forEach(def => { %>
-      <tr>
-        <td><%= def.lang || "—" %></td>
-        <td><%= def.word || "—" %></td>
-        <td><%= def.definition %></td>
-        <td><%= def.source || "—" %></td>
-      </tr>
-    <% }) %>
-  </tbody>
-</table>
+ <!-- Contenu principal centré -->
+ <div id="app" class="d-flex justify-content-center min-vh-100">
+  <div class="container-fluid px-4">
+    <h1><%= title %></h1>
+    <!-- Table pour afficher toutes les définitions -->
+    <table id="definitionsTable" class="display">
+      <thead>
+        <tr>
+          <th>Langue</th>
+          <th>Mot</th>
+          <th>Définition</th>
+          <th>Source</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% definitions.forEach(def => { %>
+          <tr>
+            <td><%= def.lang || "—" %></td>
+            <td><%= def.word || "—" %></td>
+            <td><%= def.definition %></td>
+            <td><%= def.source || "—" %></td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+</div>
 <script>
-  document.addEventListener("DOMContentLoaded", function () {
-    let table = new DataTable('#definitionsTable', {
-      paging: true,             // Active la pagination
-      pageLength: <%= step %>,           // Définit le nombre d'éléments par page
-      lengthMenu: [5, 10, 20, 50, 100], // Options pour le nombre d'éléments par page
-      searching: true,          // Active la barre de recherche
-      info: true,               // Affiche les informations sur le nombre d'entrées
-      stateSave: false,
-    });
-  });
+  const serverStep = <%= step %>;
 </script>
+<script src="/pagescripts/dumpscript.js"></script>

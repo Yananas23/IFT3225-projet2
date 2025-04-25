@@ -1,84 +1,93 @@
-<!-- Section utilisateur -->
-<div class="container mt-3">
-    <div class="d-flex justify-content-start align-items-center">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="text-primary" style="width: 40px; height: 40px;">
-        <path d="M256 73.825a182.175 182.175 0 1 0 182.18 182.18A182.177 182.177 0 0 0 256 73.825zm0 71.833a55.05 55.05 0 1 1-55.054 55.046A55.046 55.046 0 0 1 256 145.658zm.52 208.723h-80.852c0-54.255 29.522-73.573 48.885-90.906a65.68 65.68 0 0 0 62.885 0c19.363 17.333 48.885 36.651 48.885 90.906z" data-name="Profile"/>
-      </svg>
-  
-      <!-- Affichage du nom de l'utilisateur ou "Joueur anonyme" -->
-      <p class="ms-3 mb-0">
-        <%= pseudo !== "anonyme" ? pseudo : "Joueur anonyme" %>
-      </p>
+ <!-- Contenu principal centré -->
+ <div id="app" class="d-flex justify-content-center min-vh-100">
+    <div class="container-fluid px-4">
+      <!-- Section utilisateur -->
+        <div class="container mt-3">
+            <div class="d-flex justify-content-start align-items-center w-25">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="text-primary pfp">
+                    <path d="M256 73.825a182.175 182.175 0 1 0 182.18 182.18A182.177 182.177 0 0 0 256 73.825zm0 71.833a55.05 55.05 0 1 1-55.054 55.046A55.046 55.046 0 0 1 256 145.658zm.52 208.723h-80.852c0-54.255 29.522-73.573 48.885-90.906a65.68 65.68 0 0 0 62.885 0c19.363 17.333 48.885 36.651 48.885 90.906z" data-name="Profile"/>
+                </svg>        
+                <!-- Affichage du nom de l'utilisateur ou "Joueur anonyme" -->
+                <p class="ms-3 mb-0">
+                    <%= pseudo !== "anonyme" ? pseudo : "Joueur anonyme" %>
+                </p>
+            </div>
+        </div>
+
+        <!-- Titre -->
+        <h1 class="text-center mt-4">Jeu de mots</h1>
+
+        <!-- Container principal pour le jeu -->
+        <div id="gameContainer" class="container-fluid mt-3">
+            <div class="row">
+                <div class="col-md-3">
+                    <!-- Résultats du jeu -->
+                    <div id="gameResults" class="text-center mt-4 d-none">
+                        <h2 id="resultMessage"></h2>
+                        <p>Le mot était : <strong><%= word %></strong></p>
+                        <p>Votre score final est : <strong><span id="finalScore"><%= score %></span></strong> points</p>
+                        <button id="replayBtn" class="btn btn-primary mt-3">Jouer à nouveau ?</button>
+                    </div>
+                </div>        
+                <!-- Colonne principale du jeu (jeu de mots) -->
+                <div id="gameInterface" class="col-md-6 d-flex flex-column align-items-center text-center">
+                    <!-- Définition du mot -->
+                    <h3>Définition du mot :</h3>
+                    <p><%= definition %></p>
+                    
+                    <h2>Mot à deviner :</h2>
+                    <div id="wordDisplay" class="mb-3">
+                        <% for (let i = 0; i < word.length; i++) { %>
+                            <span class="letter" id="letter-<%= i %>">_</span>
+                        <% } %>
+                    </div>
+                    
+                    <h3>Score : <span id="score"><%= score %></span> points</h3>
+
+                    <!-- Timer -->
+                    <div id="timer-container">
+                        <p id="timer">⏳ Temps restant : <strong><%= timeLimit %></strong> secondes</p>
+                    </div>
+
+                    <!-- Formulaire pour tenter une lettre -->
+                    <form id="guessForm" action="javascript:void(0);" class="mt-3">
+                        <label for="letter">Saisir une lettre :</label>
+                        <input type="text" id="letter" maxlength="1" required class="form-control w-25 mx-auto">
+                        <button type="submit" class="btn btn-primary mt-2">Essayer</button>
+                    </form>
+                </div>
+
+                <!-- Colonne pour les suggestions (à droite du jeu) -->
+                <div class="col-md-3">
+                    <!-- Icône pour afficher les suggestions (initialement masquée) -->
+                    <div id="suggestionIcon" class="mt-3 d-none">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="suggestions text-muted">
+                            <g data-name="27.Question">
+                                <path d="M12 24a12 12 0 1 1 12-12 12.013 12.013 0 0 1-12 12zm0-22a10 10 0 1 0 10 10A10.011 10.011 0 0 0 12 2z"/>
+                                <path d="M13 16h-2v-4h1a3 3 0 1 0-3-3H7a5 5 0 1 1 6 4.9zM11 18h2v2h-2z"/>
+                            </g>
+                        </svg>
+                        <i class="fas fa-search text-info"></i>
+                        <small class="text-muted">Afficher les suggestions? (−20 points)</small>
+                    </div>
+
+                    <!-- Liste des suggestions possibles (cachée au début) -->
+                    <div id="suggestionBox" class="mt-3 d-none">
+                        <h4>Mots possibles :</h4>
+                        <ul id="suggestionList" class="list-unstyled"></ul>
+                    </div>
+                </div>
+            </div>    
+        </div>
     </div>
 </div>
-
-<!-- Titre -->
-<h1 class="text-center mt-4">Jeu de mots</h1>
-
-<!-- Container principal pour le jeu -->
-<div id="gameContainer" class="container-fluid mt-3">
-    <div class="row">
-        <div class="col-md-3">
-            <!-- Résultats du jeu -->
-            <div id="gameResults" style="display: none;" class="text-center mt-4">
-                <h2 id="resultMessage"></h2>
-                <p>Le mot était : <strong><%= word %></strong></p>
-                <p>Votre score final est : <strong><span id="finalScore"><%= score %></span></strong> points</p>
-                <button id="replayBtn" class="btn btn-primary mt-3">Jouer à nouveau ?</button>
-            </div>
-        </div>        
-        <!-- Colonne principale du jeu (jeu de mots) -->
-        <div id="gameInterface" class="col-md-6 d-flex flex-column align-items-center text-center">
-            <!-- Définition du mot -->
-            <h3>Définition du mot :</h3>
-            <p><%= definition %></p>
-            
-            <h2>Mot à deviner :</h2>
-            <div id="wordDisplay" class="mb-3">
-                <% for (let i = 0; i < word.length; i++) { %>
-                    <span class="letter" id="letter-<%= i %>">_</span>
-                <% } %>
-            </div>
-            
-            <h3>Score : <span id="score"><%= score %></span> points</h3>
-
-            <!-- Timer -->
-            <div id="timer-container">
-                <p id="timer">⏳ Temps restant : <strong><%= timeLimit %></strong> secondes</p>
-            </div>
-
-            <!-- Formulaire pour tenter une lettre -->
-            <form id="guessForm" action="javascript:void(0);" class="mt-3">
-                <label for="letter">Saisir une lettre :</label>
-                <input type="text" id="letter" maxlength="1" required class="form-control w-25 mx-auto">
-                <button type="submit" class="btn btn-primary mt-2">Essayer</button>
-            </form>
-        </div>
-
-        <!-- Colonne pour les suggestions (à droite du jeu) -->
-        <div class="col-md-3">
-            <!-- Icône pour afficher les suggestions (initialement masquée) -->
-            <div id="suggestionIcon" class="mt-3" style="display: none; cursor: pointer;">
-                <i class="fas fa-search text-info" style="font-size: 24px;"></i>
-                <small class="text-muted">Afficher les suggestions (−20 points)</small>
-            </div>
-
-            <!-- Liste des suggestions possibles (cachée au début) -->
-            <div id="suggestionBox" class="mt-3" style="display: none;">
-                <h4>Suggestions possibles :</h4>
-                <ul id="suggestionList" class="list-unstyled"></ul>
-            </div>
-        </div>
-    </div>    
-</div>
-
 <script>
     const allServerSuggestions = <%- JSON.stringify(suggestions) %>;
     const wordFromServer = "<%= word %>".toLowerCase();
     const scoreFromServer = <%= score %>;
     const timeLimitFromServer = <%= timeLimit %>;
     const hintIntervalTimeFromServer = <%= hintIntervalTime %>;
-    console.log("Liste des suggestions :", allSuggestions);
+    console.log("Liste des suggestions :", allServerSuggestions);
     console.log("Mot à deviner (en minuscule) : " + wordFromServer);    
 </script>
-<script src="../pagescripts/gamescript.js"></script>
+<script src="/pagescripts/gamescript.js"></script>
