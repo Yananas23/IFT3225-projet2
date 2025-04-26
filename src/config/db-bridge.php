@@ -38,16 +38,51 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 $db_host = $config['DB_HOST'] ?? 'localhost';
 $db_user = $config['DB_USER'] ?? 'root';
 $db_password = $config['DB_PASSWORD'] ?? '';
-$db_name = $config['DB_NAME'] ?? '';
+$db_name = ($config['DB_USER'] ?? 'root') . "_" . ($config['DB_NAME'] ?? 'p2');
 $error_msg = "";
 
 try {
     $pdo = new PDO("mysql:host=$db_host; dbname=$db_name; charset=utf8", $db_user, $db_password);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 } catch (PDOException $e) {
-    http_response_code(500);
-    echo json_encode(['error' => 'Erreur de connexion à la BDD: ' . $e->getMessage()]);
-    exit();
+    // Si la connexion échoue, on tente de créer la base de données
+    try {
+        // Connexion sans spécifier de base de données
+        $pdo_temp = new PDO("mysql:host=$db_host; charset=utf8", $db_user, $db_password);
+        $pdo_temp->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        
+        // Création de la base de données
+        $pdo_temp->exec("CREATE DATABASE IF NOT EXISTS `$db_name`");
+        
+        // Sélection de la base de données
+        $pdo_temp->exec("USE `$db_name`");
+        
+        // Lecture et exécution du fichier SQL
+        $sql = file_get_contents('./p2.sql');
+        
+        // Suppression des commentaires et exécution
+        $sql = preg_replace('/\/\*.*?\*\/;?/', '', $sql);
+        $sql = preg_replace('/--.*?[\r\n]/', '', $sql);
+        
+        // Séparation des instructions
+        $queries = explode(';', $sql);
+        
+        foreach ($queries as $query) {
+            $query = trim($query);
+            if (!empty($query)) {
+                $pdo_temp->exec($query);
+            }
+        }
+        
+        // Réétablir la connexion principale
+        $pdo = new PDO("mysql:host=$db_host; dbname=$db_name; charset=utf8", $db_user, $db_password);
+        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        
+    } catch (PDOException $e2) {
+        http_response_code(500);
+        echo json_encode(['error' => 'Échec de création de la BDD: ' . $e2->getMessage()]);
+        exit();
+    }
 }
 
 $request = json_decode(file_get_contents('php://input'), true);
