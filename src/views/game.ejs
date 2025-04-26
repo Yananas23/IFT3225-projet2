@@ -12,10 +12,25 @@
                     <%= pseudo !== "anonyme" ? pseudo : "Joueur anonyme" %>
                 </p>
             </div>
+            <!-- Affichage du score global d'un joueur connecté -->
+            <div class="d-flex justify-content-start align-items-center w-25">
+                <p class="ms-3 mb-0 text-muted small d-flex align-items-center">
+                    <% if (globalScore >= 0) { %>
+                        <svg version="1.0" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="64px" height="64px" viewBox="0 0 64 64" enable-background="new 0 0 64 64" xml:space="preserve" fill="#000000">
+                            <g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> 
+                                <path fill="#231F20" d="M60,4H48c0-2.215-1.789-4-4-4H20c-2.211,0-4,1.785-4,4H4C1.789,4,0,5.785,0,8v8c0,8.836,7.164,16,16,16 c0.188,0,0.363-0.051,0.547-0.059C17.984,37.57,22.379,41.973,28,43.43V56h-8c-2.211,0-4,1.785-4,4v4h32v-4c0-2.215-1.789-4-4-4h-8 V43.43c5.621-1.457,10.016-5.859,11.453-11.488C47.637,31.949,47.812,32,48,32c8.836,0,16-7.164,16-16V8C64,5.785,62.211,4,60,4z M8,16v-4h8v12C11.582,24,8,20.414,8,16z M56,16c0,4.414-3.582,8-8,8V12h8V16z"></path>
+                            </g>
+                        </svg>
+                    <% } %>
+                    <span id="scoreGlobalDisplay">
+                        <%= globalScore >= 0 ? `Score global : ${globalScore} pts` : '' %>
+                    </span>
+                </p>
+            </div>
         </div>
 
         <!-- Titre -->
-        <h1 class="text-center mt-4">Jeu de mots</h1>
+        <h1 class="text-center mt-4">Jeu des mots</h1>
 
         <!-- Container principal pour le jeu -->
         <div id="gameContainer" class="container-fluid mt-3">
@@ -24,13 +39,13 @@
                     <!-- Résultats du jeu -->
                     <div id="gameResults" class="text-center mt-4 d-none">
                         <h2 id="resultMessage"></h2>
-                        <p>Le mot était : <strong><%= word %></strong></p>
-                        <p>Votre score final est : <strong><span id="finalScore"><%= score %></span></strong> points</p>
-                        <button id="replayBtn" class="btn btn-primary mt-3">Jouer à nouveau ?</button>
+                        <p>Le mot était : <b><%= word %></b></p>
+                        <p>Votre score final est : <b><span id="finalScore"></span></b> points</p>
+                        <button id="replayBtn" class="btn btn-primary mt-3">Jouer à nouveau?</button>
                     </div>
                 </div>        
                 <!-- Colonne principale du jeu (jeu de mots) -->
-                <div id="gameInterface" class="col-md-6 d-flex flex-column align-items-center text-center">
+                <div id="gameInterface" class="col-md-6 d-flex flex-column align-items-center text-center p-4 border">
                     <!-- Définition du mot -->
                     <h3>Définition du mot :</h3>
                     <p><%= definition %></p>
@@ -46,7 +61,7 @@
 
                     <!-- Timer -->
                     <div id="timer-container">
-                        <p id="timer">⏳ Temps restant : <strong><%= timeLimit %></strong> secondes</p>
+                        <p id="timer">⏳ Temps restant : <b><%= timeLimit %></b> secondes</p>
                     </div>
 
                     <!-- Formulaire pour tenter une lettre -->
@@ -72,7 +87,7 @@
                     </div>
 
                     <!-- Liste des suggestions possibles (cachée au début) -->
-                    <div id="suggestionBox" class="mt-3 d-none">
+                    <div id="suggestionBox" class="mt-3 d-none p-4">
                         <h4>Mots possibles :</h4>
                         <ul id="suggestionList" class="list-unstyled"></ul>
                     </div>
@@ -85,9 +100,10 @@
     const allServerSuggestions = <%- JSON.stringify(suggestions) %>;
     const wordFromServer = "<%= word %>".toLowerCase();
     const scoreFromServer = <%= score %>;
+    const globalScoreFromServer = <%= globalScore %>;
     const timeLimitFromServer = <%= timeLimit %>;
     const hintIntervalTimeFromServer = <%= hintIntervalTime %>;
-    console.log("Liste des suggestions :", allServerSuggestions);
+    // console.log("Liste des suggestions :", allServerSuggestions);
     console.log("Mot à deviner (en minuscule) : " + wordFromServer);    
 </script>
 <script src="/pagescripts/gamescript.js"></script>

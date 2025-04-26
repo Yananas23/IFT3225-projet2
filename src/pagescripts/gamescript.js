@@ -2,6 +2,7 @@ let word = wordFromServer;  // Mot à deviner
 let score = scoreFromServer;  // Score actuel
 let timeRemaining = timeLimitFromServer;  // Temps initial du jeu
 let guessedLetters = [];  // Tableau pour les lettres déjà devinées    
+let playerGlobalScore = globalScoreFromServer;
 let hintIntervalTime = hintIntervalTimeFromServer;
 
 const allSuggestions = allServerSuggestions;
@@ -38,7 +39,7 @@ document.getElementById("replayBtn").addEventListener("click", function() {
 // Met à jour le score et affiche un message si le mot est trouvé
 function updateScoreAndCheckWin(letter) {
     letter = letter.toLowerCase();  // Convertir la lettre devinée en minuscule
-    console.log(`Lettre devinée : "${letter}"`);  // Affiche la lettre devinée
+    // console.log(`Lettre devinée : "${letter}"`);
     if (word.includes(letter)) {
         score += 5;
         guessedLetters.push(letter);
@@ -55,6 +56,7 @@ function updateScoreAndCheckWin(letter) {
 
     // Vérifie si le joueur a trouvé le mot
     if (isWordFullyRevealed()) {
+        score += Math.floor(timeRemaining/2);
         // Afficher le message de victoire
         showGameResult("Félicitations ! Vous avez trouvé le mot.");
         clearInterval(timerInterval); // Arrêter le timer
@@ -63,6 +65,7 @@ function updateScoreAndCheckWin(letter) {
         const form = document.getElementById("guessForm");
         const button = form.querySelector("button[type='submit']");
         button.disabled = true;
+        sendScore(score);
     }
 }
 
@@ -100,6 +103,7 @@ function revealHint() {
 
         // Vérifier si le mot est maintenant complet après avoir révélé une lettre
         if (isWordFullyRevealed()) {
+            score += Math.floor(timeRemaining/2);
             // Afficher le message de victoire
             showGameResult("Félicitations ! Vous avez trouvé le mot.");
             clearInterval(timerInterval); // Arrêter le timer
@@ -107,7 +111,8 @@ function revealHint() {
             // Désactivation du formulaire et du bouton
             const form = document.getElementById("guessForm");
             const button = form.querySelector("button[type='submit']");
-            button.disabled = true;
+            button.disabled = true;            
+            sendScore(score);
         }
     }
 }
@@ -139,7 +144,7 @@ document.getElementById('guessForm').addEventListener('submit', function(e) {
         updateScoreAndCheckWin(letter);
         updateWordDisplay();
     } else {
-        alert("Veuillez entrer une lettre valide qui n'a pas encore été devinée.");
+        alert("Veuillez entrer une lettre qui n'a pas encore été devinée.");
     }
 
     // Effacer l'input après chaque tentative
@@ -165,6 +170,7 @@ const timerInterval = setInterval(function() {
         // Afficher le message de fin de partie
         showGameResult("Temps écoulé ! Vous avez perdu !");
         clearInterval(hintInterval);  // Arrêter la révélation des indices
+        sendScore(score);
     }
 }, 1000);
 
@@ -222,6 +228,28 @@ document.getElementById("suggestionIcon").addEventListener("click", function () 
         alert("Score insuffisant pour afficher des mots possibles!");
     }
 });
+
+function sendScore(score) {
+    if(playerGlobalScore >= 0) {
+        fetch("/jeu/word/score", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ score })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.nouveauScore) {
+                document.getElementById("scoreGlobalDisplay").innerText = `Score global : ${data.nouveauScore} pts`;
+            }
+        })
+        .catch(err => {
+            console.error("Erreur lors de l'envoi du score :", err);
+            alert("Erreur lors de l'enregistrement du score.");
+        });
+    }    
+}
 
 // Initialiser l'affichage du mot
 updateWordDisplay();

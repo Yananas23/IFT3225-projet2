@@ -19,14 +19,14 @@ document.addEventListener("DOMContentLoaded", () => {
     // Création et insertion du timer
     const timerDisplay = document.createElement("p");
     timerDisplay.id = "timer";
-    timerDisplay.innerHTML = `⏳ Temps restant : <strong>${tempsRestant}</strong> secondes`;
+    timerDisplay.innerHTML = `⏳ Temps restant : <b>${tempsRestant}</b> secondes`;
 
     const container = document.getElementById("timer-container");
     container.appendChild(timerDisplay);
 
     const interval = setInterval(() => {
       tempsRestant--;
-      timerDisplay.innerHTML = `⏳ Temps restant : <strong>${tempsRestant}</strong> secondes`;      
+      timerDisplay.innerHTML = `⏳ Temps restant : <b>${tempsRestant}</b> secondes`;      
 
       if (tempsRestant <= 0) {
         clearInterval(interval);

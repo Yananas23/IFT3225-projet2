@@ -22,10 +22,14 @@ router.get("/word/:lg?/:time?/:hint?", async (req, res) => {
 
         const { word, wordId, definition } = wordData;
 
-        // Initialiser le score du joueur
+        // Initialiser le score du joueur pour la partie
         const initialScore = 10 * word.length;
         let score = initialScore;
 
+        // Score global du joueur
+        const globalScore = req.session.joueur?.score || -1;
+
+        // Mots suggérés
         const suggestions = await Word.FindSuggestions(word, lg);
 
         // Si le joueur est connecté, on récupère son pseudo
@@ -34,13 +38,14 @@ router.get("/word/:lg?/:time?/:hint?", async (req, res) => {
         // Afficher la page de jeu avec les informations nécessaires
         res.render("game", {
             layout: "layout",
-            title: "Jeu de mots",
+            title: "Jeu des mots",
             word,
             wordId,
             definition,
             timeLimit: time,
             score,
             pseudo,
+            globalScore,
             isConnected: pseudo !== "anonyme",
             hintIntervalTime,
             suggestions,
@@ -49,6 +54,39 @@ router.get("/word/:lg?/:time?/:hint?", async (req, res) => {
     } catch (err) {
         console.error(err);
         res.status(500).send("Erreur lors de la création du jeu.");
+    }
+});
+
+router.post("/word/score", async (req, res) => {
+    try {
+        const pseudo = req.session.joueur?.pseudo;
+        const winScore = parseInt(req.body.score, 10);
+
+        if (!pseudo || isNaN(winScore)) {
+            return res.status(400).json({ error: 'Score ou ID utilisateur manquant.' });
+        }
+
+        // Récupérer le joueur
+        const joueur = await Joueur.findOne({ where: { pseudo } });
+        if (!joueur) {
+            return res.status(404).json({ message: "Joueur introuvable!" });
+        }
+
+        const nouveauScore = (joueur.score || 0) + winScore;
+
+        // Joueur.update
+        await Joueur.update(
+            { score: nouveauScore },
+            { where: { pseudo } }
+        );
+
+        // Mettre à jour la session
+        req.session.joueur.score = nouveauScore;
+
+        res.json({ message: "Score mis à jour", nouveauScore });
+    } catch (err) {
+        console.error("Erreur dans /word/score :", err);
+        res.status(500).json({ message: "Erreur serveur" });
     }
 });
 
@@ -64,7 +102,7 @@ router.get("/def/:lg?/:time?", async (req, res) => {
         }
 
         const pseudo = req.session.joueur?.pseudo || null;
-        let score = null;
+        let score = -1;
 
         if (pseudo) {
             // Par une requête SQL manuelle :
@@ -74,7 +112,7 @@ router.get("/def/:lg?/:time?", async (req, res) => {
               );
             
             const joueur = joueurResponse[0]; // Le premier élément du tableau retourné (si un joueur existe)
-            score = joueur?.score ?? null;
+            score = joueur?.score ?? -1;
         }
 
         res.render("def", {
@@ -107,7 +145,7 @@ router.post("/def/:wordId", async (req, res) => {
         console.log("Body:", req.body);
         console.log("Définitions soumises:", defs);
 
-        const pseudo = req.session.joueur?.pseudo || "anonyme";
+        const pseudo = req.session.joueur?.pseudo || "Joueur anonyme";
 
         // Requête SQL manuelle pour récupérer le mot avec son ID
         const wordData = await sequelize.query(
@@ -160,7 +198,7 @@ router.post("/def/:wordId", async (req, res) => {
             validDefs++;
         }
 
-        let updatedScore = null;
+        let updatedScore = -1;
         if (req.session.joueur && validDefs > 0) {
             // Par une requête SQL manuelle :
             const joueurResponse = await sequelize.query(
@@ -168,6 +206,7 @@ router.post("/def/:wordId", async (req, res) => {
                 [pseudo]
             );
             
+            console.log("Joueur Response : ", joueurResponse);
             const joueur = joueurResponse[0];
             updatedScore = joueur.score + validDefs * 5;
             await Joueur.update({ score: updatedScore }, { where: { pseudo } });
@@ -189,7 +228,6 @@ router.post("/def/:wordId", async (req, res) => {
     }
 });
 
-
 // FONCTIONS
 
 function authRequired(req, res, next) {
@@ -198,40 +236,6 @@ function authRequired(req, res, next) {
     }
     next();
 }
-
-
-/*
-// getRandomWord pour sequelize seulement
-async function getRandomWord(lang = "en") {
-    try {
-        const words = await Word.findAll({
-            where: { lang },
-            include: {
-                model: Definition,
-                through: { attributes: [] } // évite les colonnes de jointure
-            }
-        });
-
-        if (!words || words.length === 0) return null;
-
-        const validWords = words.filter(w => w.Definitions && w.Definitions.length > 0);
-        if (validWords.length === 0) return null;
-
-        const randomWord = validWords[Math.floor(Math.random() * validWords.length)];
-        const randomDef = randomWord.Definitions[Math.floor(Math.random() * randomWord.Definitions.length)]; // Choisir une définition du mot au hasard
-
-        return {
-            word: randomWord.word,
-            wordId: randomWord.id,
-            definition: randomDef.definition,
-            definitionId: randomDef.id
-        };
-    } catch (err) {
-        console.error("Erreur dans getRandomWord :", err);
-        return null;
-    }
-}
-*/
 
 async function getRandomWord(lang = "en") {
     try {
@@ -271,7 +275,5 @@ async function getRandomWord(lang = "en") {
         return null;
     }
 }
-
-
 
 module.exports = router;
