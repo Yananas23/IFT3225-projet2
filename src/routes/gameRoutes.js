@@ -3,6 +3,8 @@ const sequelize = require("../config/database");
 const Joueur = require("../models/joueur");
 const Word = require("../models/word");
 
+const allowedLangs = ["en", "fr"]; // Langues supportées
+
 const router = express.Router();
 
 // Routes finales
@@ -11,7 +13,6 @@ router.get("/word/:lg?/:time?/:hint?", async (req, res) => {
         const { lg = "en", time = 60 } = req.params;  // Langue et temps par défaut
         const hintIntervalTime = req.params.hint || 10;  // Par défaut, 10 secondes
 
-        const allowedLangs = ["en", "fr"];
         if (!allowedLangs.includes(lg)) return res.status(400).send("Langue non supportée.");
 
         // Récupérer un mot aléatoire de la langue spécifiée
@@ -33,7 +34,7 @@ router.get("/word/:lg?/:time?/:hint?", async (req, res) => {
         const suggestions = await Word.FindSuggestions(word, lg);
 
         // Si le joueur est connecté, on récupère son pseudo
-        const pseudo = req.session.joueur?.pseudo || "anonyme";
+        const pseudo = req.session.joueur?.pseudo || "";
 
         // Afficher la page de jeu avec les informations nécessaires
         res.render("game", {
@@ -46,7 +47,6 @@ router.get("/word/:lg?/:time?/:hint?", async (req, res) => {
             score,
             pseudo,
             globalScore,
-            isConnected: pseudo !== "anonyme",
             hintIntervalTime,
             suggestions,
         });
@@ -92,9 +92,11 @@ router.post("/word/score", async (req, res) => {
 
 
 router.get("/def/:lg?/:time?", async (req, res) => {
-    try {
+    try {      
         const lang = req.params.lg || "en";
         const time = parseInt(req.params.time, 10) || 60;
+
+        if (!allowedLangs.includes(lang)) return res.status(400).send("Langue non supportée.");
 
         const wordData = await getRandomWord(lang);
         if (!wordData) {
@@ -135,17 +137,13 @@ router.get("/def/:lg?/:time?", async (req, res) => {
 
 router.post("/def/:wordId", async (req, res) => {
     try {
-        const { wordId } = req.params;
-        const defs = Array.isArray(req.body.definition) 
-            ? req.body.definition 
-            : [req.body.definition];
+        const wordId = req.params.wordId;
+        const { definitions } = req.body;
 
-        console.log("Données reçues dans le POST /def/:wordId:");
-        console.log("Params:", req.params);
-        console.log("Body:", req.body);
-        console.log("Définitions soumises:", defs);
+        // console.log(`Définitions reçues pour le mot ${wordId} :`, definitions);
 
-        const pseudo = req.session.joueur?.pseudo || "Joueur anonyme";
+        const pseudo = req.session.joueur?.pseudo || "";
+        const source = req.session.joueur?.pseudo || "Joueur anonyme";
 
         // Requête SQL manuelle pour récupérer le mot avec son ID
         const wordData = await sequelize.query(
@@ -170,7 +168,8 @@ router.post("/def/:wordId", async (req, res) => {
         const existingTexts = new Set(existingDefs.map(def => def.definition.toLowerCase()));
 
         let validDefs = 0;
-        for (let def of defs) {
+        for (let def of definitions) {
+            console.log(def);
             if (!def || typeof def !== 'string' || def.trim().length === 0) {
                 // Si la définition est invalide (null, undefined ou vide), on la saute
                 continue;
@@ -183,7 +182,7 @@ router.post("/def/:wordId", async (req, res) => {
             // Si la définition est valide, on l'ajoute à la base de données
             const newDefResponse = await sequelize.query(
                 `INSERT INTO definition (definition, source) VALUES (?, ?)`,
-                [text, pseudo]
+                [text, source]
             );
 
             const newDefId = newDefResponse.insertId;
@@ -206,19 +205,18 @@ router.post("/def/:wordId", async (req, res) => {
                 [pseudo]
             );
             
-            console.log("Joueur Response : ", joueurResponse);
+            // console.log("Joueur Response : ", joueurResponse);
             const joueur = joueurResponse[0];
             updatedScore = joueur.score + validDefs * 5;
             await Joueur.update({ score: updatedScore }, { where: { pseudo } });
             req.session.joueur.score = updatedScore;
         }
 
-        res.render("def_result", {
-            layout: "layout",
-            title: "Résultat du jeu des définitions",
+        res.json({
+            success: true,
             pseudo,
-            gainedPoints: validDefs * 5,
-            updatedScore,
+            gainedPoints: validDefs * 5, // Points pour la partie
+            updatedScore, // Score global du joueur
             isConnected: !!req.session.joueur
         });
 
@@ -229,13 +227,6 @@ router.post("/def/:wordId", async (req, res) => {
 });
 
 // FONCTIONS
-
-function authRequired(req, res, next) {
-    if (!req.session.joueur) {
-      return res.status(401).send("Connexion requise!");
-    }
-    next();
-}
 
 async function getRandomWord(lang = "en") {
     try {

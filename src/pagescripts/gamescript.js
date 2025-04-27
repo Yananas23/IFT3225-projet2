@@ -167,8 +167,7 @@ const timerInterval = setInterval(function() {
         const form = document.getElementById("guessForm");
         const button = form.querySelector("button[type='submit']");
         button.disabled = true;
-        // Afficher le message de fin de partie
-        showGameResult("Temps écoulé ! Vous avez perdu !");
+        showGameResult("Temps écoulé! Vous n'avez pas trouvé le mot.");
         clearInterval(hintInterval);  // Arrêter la révélation des indices
         sendScore(score);
     }

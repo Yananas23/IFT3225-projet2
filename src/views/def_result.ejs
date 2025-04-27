@@ -1,14 +1,14 @@
 <h2>Résultat du jeu des définitions</h2>
 
 <% if (gainedPoints > 0) { %>
-  <p>✅ <strong><%= gainedPoints %></strong> points gagnés.</p>
+  <p><b><%= gainedPoints %></b> points gagnés.</p>
   <% if (isConnected) { %>
-    <p>🎯 Nouveau score de <%= pseudo %> : <strong><%= updatedScore %></strong></p>
+    <p>Nouveau score de <%= pseudo %> : <b><%= updatedScore %></b></p>
   <% } else { %>
-    <p>💡 Connecte-toi la prochaine fois pour enregistrer ton score !</p>
+    <p>Connectez-vous la prochaine fois pour enregistrer votre score!</p>
   <% } %>
 <% } else { %>
-  <p>⚠️ Aucune définition valide n’a été ajoutée.</p>
+  <p>Aucune définition valide n’a été ajoutée.</p>
 <% } %>
 
 <a href="/jeu/def"><button>Rejouer</button></a>
