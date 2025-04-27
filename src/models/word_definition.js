@@ -1,4 +1,4 @@
-// word_definition.js adapté pour PHPBridge
+// - word_definition.js : Modèle pour gérer les relations entre les mots et leurs définitions dans la base de données.
 const sequelize = require("../config/database");
 const Word = require("./word");
 const Definition = require("./definition");

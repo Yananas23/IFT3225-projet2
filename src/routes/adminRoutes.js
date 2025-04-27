@@ -1,3 +1,4 @@
+// - adminRoutes.js : Gère les routes d'administration pour visualiser et gérer les données comme les classements, suppression d'utilisateurs et ajout de mots.
 const express = require("express");
 const Joueur = require("../models/joueur");
 const Word = require("../models/word");

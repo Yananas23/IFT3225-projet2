@@ -1,3 +1,5 @@
+//- wordRoutes.js : Gère les routes pour l'ajout et la récupération de mots et définitions.
+
 const express = require("express");
 const https = require("https");
 const Joueur = require("../models/joueur");

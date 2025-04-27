@@ -1,3 +1,4 @@
+// - gamescript.js : script pour le modèle game.ejs
 let word = wordFromServer;  // Mot à deviner
 let score = scoreFromServer;  // Score actuel
 let timeRemaining = timeLimitFromServer;  // Temps initial du jeu

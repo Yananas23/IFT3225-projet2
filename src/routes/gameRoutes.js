@@ -1,13 +1,13 @@
+// - gameRoutes.js : Gère les routes du jeu pour récupérer des mots aléatoires, jouer, et mettre à jour les scores.
 const express = require("express");
 const sequelize = require("../config/database");
 const Joueur = require("../models/joueur");
 const Word = require("../models/word");
-
 const allowedLangs = ["en", "fr"]; // Langues supportées
-
 const router = express.Router();
 
-// Routes finales
+// ROUTES
+
 router.get("/word/:lg?/:time?/:hint?", async (req, res) => {
     try {
         const { lg = "en", time = 60 } = req.params;  // Langue et temps par défaut
@@ -130,7 +130,7 @@ router.get("/def/:lg?/:time?", async (req, res) => {
         });
 
     } catch (err) {
-        console.error("Erreur dans /def :", err);
+        console.error("Erreur dans /def/ :", err);
         res.status(500).send("Erreur lors de la génération de la partie.");
     }
 });
@@ -169,15 +169,14 @@ router.post("/def/:wordId", async (req, res) => {
 
         let validDefs = 0;
         for (let def of definitions) {
-            console.log(def);
             if (!def || typeof def !== 'string' || def.trim().length === 0) {
                 // Si la définition est invalide (null, undefined ou vide), on la saute
                 continue;
             }
 
             const text = def.trim();
-            if (text.length < 5 || text.length > 200) continue;
-            if (existingTexts.has(text.toLowerCase())) continue;
+            if (text.length < 5 || text.length > 200) continue; // Sauter si longuer incorrecte
+            if (existingTexts.has(text.toLowerCase())) continue; // Sauter si la définition existe déjà
 
             // Si la définition est valide, on l'ajoute à la base de données
             const newDefResponse = await sequelize.query(
@@ -186,7 +185,7 @@ router.post("/def/:wordId", async (req, res) => {
             );
 
             const newDefId = newDefResponse.insertId;
-            console.log("Def response! ", newDefId)
+            // console.log("Def response! ", newDefId)
 
             // Création de l'association entre le mot et la définition
             await sequelize.query(

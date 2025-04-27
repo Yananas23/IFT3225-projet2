@@ -1,3 +1,4 @@
+// - gameRoutes.js : Gère la route pour afficher les définitions de la collection.
 const express = require("express");
 // const Definition = require("../models/definition");
 // const Word = require("../models/word");

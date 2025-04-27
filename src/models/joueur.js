@@ -1,4 +1,4 @@
-// joueur.js adapté pour PHPBridge
+// - joueur.js : Modèle pour gérer les joueurs avec des fonctions de recherche, création et mise à jour.
 const sequelize = require("../config/database");
 
 // Création d'un modèle "joueur" avec l'émulation PHPBridge

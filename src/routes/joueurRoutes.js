@@ -1,3 +1,4 @@
+// - joueurRoutes.js : Gère les routes liées aux joueurs comme l'inscription, connexion, déconnexion et récupération d'informations.
 const bcrypt = require("bcrypt");
 const express = require("express");
 const Joueur = require("../models/joueur");

@@ -1,6 +1,7 @@
-let playerGlobalScore = globalScoreFromServer;
-let gameWordID = wordIdFromServer;  
-let tempsRestant = tempsInitial; 
+// - defscript.js : script pour le modèle def.ejs
+let playerGlobalScore = globalScoreFromServer; // Score total du joueur
+let gameWordID = wordIdFromServer; // ID du mot pour lequel on ajoute des descriptions
+let tempsRestant = tempsInitial; // Durée d'une partie
 
 document.addEventListener("DOMContentLoaded", () => {
   let compteur = 1;     
@@ -45,6 +46,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }, 1000);
 
+  // Modifier le submi du formulaire
   const form = document.getElementById("defForm");
 
   if (form) {

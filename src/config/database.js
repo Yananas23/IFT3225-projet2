@@ -1,3 +1,4 @@
+//- database.js : Crée une classe PHPBridge qui émule les fonctionnalités de Sequelize pour interagir avec une base de données MySQL via un pont PHP.
 const axios = require("axios");
 require("dotenv").config();
 

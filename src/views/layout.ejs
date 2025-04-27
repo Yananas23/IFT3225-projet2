@@ -14,7 +14,7 @@
   <!-- Barre de navigation en haut de la page -->
   <nav class="navbar navbar-expand-lg navbar-light bg-light mb-4">
     <div class="container-fluid">
-      <a class="navbar-brand" href=".">Projet 2</a>
+      <a class="navbar-brand" href="/jeu/accueil">Projet 2</a>
       <div class="collapse navbar-collapse">
         <ul class="navbar-nav ms-auto">
           <li class="nav-item">
@@ -34,7 +34,7 @@
     </div>
   </nav> 
   <!-- Insertion du contenu avec Express Layout -->
-  <%- body %>
+  <%- body || "Assurez-vous de lancer le serveur!" %>
   <!-- Latest compiled JavaScript pour Bootstrap -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <!-- Script jQuery (Nécessaire pour DataTables) -->

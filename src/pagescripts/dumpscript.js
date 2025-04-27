@@ -1,3 +1,4 @@
+// - dumpscript.js : script pour le modèle dump.ejs
 document.addEventListener("DOMContentLoaded", function () {
     let table = new DataTable('#definitionsTable', {
       paging: true,             // Active la pagination

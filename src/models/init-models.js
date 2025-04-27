@@ -1,3 +1,4 @@
+// - init-models.js : Initialise et relie les différents modèles de données (Word, Definition, WordDefinition, Joueur) en ajoutant des méthodes pour récupérer les relations entre eux.
 const Word = require("./word");
 const Definition = require("./definition");
 const WordDefinition = require("./word_definition");

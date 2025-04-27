@@ -1,4 +1,4 @@
-// definition.js adapté pour PHPBridge
+// - definition.js : Modèle pour gérer les définitions de mots dans la base de données avec des méthodes customisées pour l'émulation de Sequelize.
 const sequelize = require("../config/database");
 
 // Création d'un modèle "definition" avec l'émulation PHPBridge

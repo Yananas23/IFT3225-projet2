@@ -1,4 +1,4 @@
-// word.js adapté pour PHPBridge
+// - word.js : Modèle pour gérer les mots avec des méthodes spécifiques incluant la recherche de suggestions de mots similaires.
 const sequelize = require("../config/database");
 
 // Création d'un modèle "word" avec l'émulation PHPBridge

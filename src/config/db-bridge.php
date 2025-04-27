@@ -1,4 +1,5 @@
 <?php
+//- db-bridge.php : Script PHP qui sert d'intermédiaire entre les requêtes JavaScript et la base de données MySQL, gérant les connexions, requêtes et transactions.
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE');
