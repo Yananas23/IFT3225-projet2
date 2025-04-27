@@ -98,8 +98,8 @@ Ces modèles permettent de d'afficher dynamiquement l'application one-page dans 
 Nous avions commencé le projet en JavaScript et utilisé le module "sequelize" mais à cause des restrictions du DIRO, il était impossible de se connecter à notre base de données. Au bout d'une semaine, nous nous sommes résolus à utiliser du PHP, mais sans tout refaire de 0, ce qui nous a amenés à créer notre propre module sequelize.
 Le fichier db-bridge.php fait exactement cela, les fichiers PHP pouvant communiquer avec les BDD du DIRO, nous avons fait le choix de faire un pont entre toute notre API existante et le DIRO. La manière dont cela fonctionne est plutôt simple, dans chaque modèle que nous avons, nous avons créé des mots-clés qui font appel à database.js pour remettre au propre les appels SQL et le pont PHP renvoie le résultat en format JSON exploitable par le reste de l'API.
 
-\subsection{...}
-...
+\subsection{Express}
+La version 5 d'Express était utilisée au départ, mais elle pausait problème pour la gestion de des "?" dans les chemins ("/word/:lg?/:time?/:hint?")
 
 
 \end{document}

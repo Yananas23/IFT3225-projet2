@@ -64,10 +64,10 @@ sequelize.sync()
     console.log("✅ Connexion à la base de données vérifiée");
     app.listen(PORT, () => {
       console.log(`🚀 Serveur démarré sur http://localhost:${PORT}`);
-      console.log(`🚀 Serveur démarré sur http://localhost:${PORT}/jeu/word/`);
-      console.log(`🚀 Serveur démarré sur http://localhost:${PORT}/jeu/def/`);
-      console.log(`🚀 Serveur démarré sur http://localhost:${PORT}/dump/`);
-      console.log(`🚀 Serveur démarré sur http://localhost:${PORT}/doc/`);
+      console.log(`Jeu des mots disponible sur http://localhost:${PORT}/jeu/word/`);
+      console.log(`Jeu des définitions disponible sur http://localhost:${PORT}/jeu/def/`);
+      console.log(`Dump disponible sur http://localhost:${PORT}/dump/`);
+      console.log(`Documentation disponible sur http://localhost:${PORT}/doc/`);
     });
   })
   .catch(err => {
