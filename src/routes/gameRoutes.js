@@ -1,6 +1,6 @@
-// - gameRoutes.js : Gère les routes du jeu pour récupérer des mots aléatoires, jouer, et mettre à jour les scores.
+// - gameRoutes.js : Gère les routes du jeu (def et word) pour récupérer des mots aléatoires, jouer, et mettre à jour les scores.
 const express = require("express");
-const sequelize = require("../config/database");
+const sequelize = require("../config/database"); // Les requêtes paramétérées de sequelize.query devrait en général empêcher l'injection de sql
 const Joueur = require("../models/joueur");
 const Word = require("../models/word");
 const allowedLangs = ["en", "fr"]; // Langues supportées
@@ -13,7 +13,17 @@ router.get("/word/:lg?/:time?/:hint?", async (req, res) => {
         const { lg = "en", time = 60 } = req.params;  // Langue et temps par défaut
         const hintIntervalTime = req.params.hint || 10;  // Par défaut, 10 secondes
 
+        
+
         if (!allowedLangs.includes(lg)) return res.status(400).send("Langue non supportée.");
+
+        if (containsScriptTags(time)) {
+            res.status(400).send('Infâme tentative d\'attaque XSS détectée!');
+        }
+
+        if (containsScriptTags(hintIntervalTime)) {
+            res.status(400).send('Ignoble tentative d\'attaque XSS détectée!');
+        }
 
         // Récupérer un mot aléatoire de la langue spécifiée
         const wordData = await getRandomWord(lg);
@@ -97,7 +107,7 @@ router.get("/def/:lg?/:time?", async (req, res) => {
         const time = parseInt(req.params.time, 10) || 60;
 
         if (!allowedLangs.includes(lang)) return res.status(400).send("Langue non supportée.");
-
+        
         const wordData = await getRandomWord(lang);
         if (!wordData) {
             return res.status(404).send("Aucun mot trouvé.");
@@ -137,8 +147,15 @@ router.get("/def/:lg?/:time?", async (req, res) => {
 
 router.post("/def/:wordId", async (req, res) => {
     try {
-        const wordId = req.params.wordId;
+        const wordId = parseInt(req.params.wordId, 10);
+        if (isNaN(wordId) || wordId <= 0) {
+            return res.status(400).json({ error: 'Identifiant de mot invalide.' });
+        }
         const { definitions } = req.body;
+
+        if (containsScriptTags(definitions)) {
+            res.status(400).send('Méprisable tentative d\'attaque XSS détectée!');
+        }
 
         // console.log(`Définitions reçues pour le mot ${wordId} :`, definitions);
 
@@ -226,6 +243,11 @@ router.post("/def/:wordId", async (req, res) => {
 });
 
 // FONCTIONS
+
+function containsScriptTags(input) {
+    const regex = /<script.*?>.*?<\/script>/gi;
+    return regex.test(input);
+}
 
 async function getRandomWord(lang = "en") {
     try {

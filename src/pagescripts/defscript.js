@@ -33,7 +33,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (tempsRestant <= 0) {
       clearInterval(interval);
-      timerDisplay.innerHTML = "⏰ Temps écoulé !";
+      timerDisplay.textContent  = "⏰ Temps écoulé !";
       timerDisplay.style.color = "gray";
 
       const form = document.querySelector("form");
@@ -82,7 +82,7 @@ document.addEventListener("DOMContentLoaded", () => {
             `;    
             // Si joueur connecté, mettre à jour l'affichage du score
             if (data.isConnected && data.updatedScore !== undefined) {
-                document.getElementById("scoreGlobalDisplay").innerText = `Score global : ${data.updatedScore} pts`;
+                document.getElementById("scoreGlobalDisplay").textContent = `Score global : ${data.updatedScore} pts`;
             }
         } else {
             resultContainer.innerHTML = `<p class="text-danger">Une erreur s'est produite lors de l'envoi.</p>`;

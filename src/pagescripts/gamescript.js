@@ -162,7 +162,7 @@ const timerInterval = setInterval(function() {
     // Fin du temps
     if (timeRemaining <= 0) {
         clearInterval(timerInterval);
-        timerDisplay.innerHTML = "⏰ Temps écoulé !";
+        timerDisplay.textContent = "⏰ Temps écoulé !";
         timerDisplay.classList.add('text-secondary');
 
         // Désactivation du formulaire à la fin du temps
@@ -177,7 +177,7 @@ const timerInterval = setInterval(function() {
 
 function updateSuggestionList() {
     const listContainer = document.getElementById("suggestionList");
-    listContainer.innerHTML = "";
+    listContainer.textContent = "";
 
     const lowerCaseWord = word.toLowerCase();
     const revealedPattern = word.split("").map((char, idx) =>

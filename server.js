@@ -20,7 +20,8 @@ app.use(session({
   secret: 'dev-secret', // OK pour dev ou localhost
   resave: false,
   saveUninitialized: false,
-  cookie: { secure: false } // OK pour localhost
+  rolling: true, // SID renouvelé à chaque requête
+  cookie: { secure: false } // Autoriser l'envoie des cookies de session sur une connexion non sécurisée, OK pour localhost, mais pas en production
 }));
 
 // Configuration EJS
