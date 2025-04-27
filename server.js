@@ -14,7 +14,7 @@ const wordRoutes = require("./src/routes/wordRoutes");
 const dumpRoute = require("./src/routes/dumpRoute");
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5005;
 
 app.use(session({
   secret: 'dev-secret', // OK pour dev ou localhost
@@ -64,6 +64,10 @@ sequelize.sync()
     console.log("✅ Connexion à la base de données vérifiée");
     app.listen(PORT, () => {
       console.log(`🚀 Serveur démarré sur http://localhost:${PORT}`);
+      console.log(`🚀 Serveur démarré sur http://localhost:${PORT}/jeu/word/`);
+      console.log(`🚀 Serveur démarré sur http://localhost:${PORT}/jeu/def/`);
+      console.log(`🚀 Serveur démarré sur http://localhost:${PORT}/dump/`);
+      console.log(`🚀 Serveur démarré sur http://localhost:${PORT}/doc/`);
     });
   })
   .catch(err => {

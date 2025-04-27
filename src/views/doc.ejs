@@ -1,7 +1,7 @@
-<div class="container my-5">
+<div class="container my-5" id="Doc">
   <h1 class="mb-3">📘 Documentation API REST</h1>
   <h3 class="text-muted mb-4">Yanis Boulogne | Karl-Antoine Plouffe</h3>
-  <nav class="nav nav-pills flex-wrap mb-4 gap-2">
+  <nav class="navbar nav nav-pills flex-wrap mb-4 gap-2">
     <a class="nav-link" href="#user">Joueur</a>
     <a class="nav-link" href="#word">Mot</a>
     <a class="nav-link" href="#admin">Admin</a>
@@ -100,12 +100,12 @@
     
   <section id="game">
     <h2  class="mt-5 section-title">Jeu</h2>
-    <div>
-      <h4><span>GET</span>&lt;path&gt;#/jeu/word/[/&lt;lg&gt;[/&lt;time&gt;[/&lt;hint&gt;]]]</h4>
+    <div class="command">
+      <h4><span class="method GET">GET</span>&lt;path&gt;#/jeu/word/[/&lt;lg&gt;[/&lt;time&gt;[/&lt;hint&gt;]]]</h4>
       <p>Retourne une page HTML qui permet à un joueur de deviner en temps limité le mot correspondant à une définition affichée pour un mot choisi aléatoirement dans la collection.</p>
     </div>
-    <div>
-      <h4><span>GET</span>&lt;path&gt;#/jeu/def/[/&lt;lg&gt;[/&lt;time&gt;]]</h4>
+    <div class="command">
+      <h4><span class="method GET">GET</span>&lt;path&gt;#/jeu/def/[/&lt;lg&gt;[/&lt;time&gt;]]</h4>
       <p>Sélectionne un mot aléatoirement de la langue. Affiche ce mot. Demande au joueur de saisir des définitions qui seront ajoutées pour ce mot dans la
         base de données.</p>
     </div>
@@ -128,3 +128,24 @@
     </div>
   </section>  
 </div>
+<script>
+  document.getElementById('darkModeToggle').addEventListener('click', function() {
+      document.body.classList.toggle('dark-mode');
+      document.querySelector('.navbar').classList.toggle('dark-mode');
+      var commands = document.querySelectorAll('.command');
+      commands.forEach(function(command) {
+          command.classList.toggle('dark-mode');
+      });
+      var sectionTitles = document.querySelectorAll('.section-title');
+      sectionTitles.forEach(function(sectionTitle) {
+          sectionTitle.classList.toggle('dark-mode');
+      });
+
+      // Changer le texte du bouton en fonction du mode
+      if (document.body.classList.contains('dark-mode')) {
+          this.textContent = 'Mode clair';
+      } else {
+          this.textContent = 'Mode sombre';
+      }
+  });
+</script>
