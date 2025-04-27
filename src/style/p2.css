@@ -5,3 +5,78 @@
 .suggestions {
     max-width: 2rem;
 }
+
+/* CSS de la Doc */
+#Doc h1 {
+    text-align: center;
+    margin-bottom: -1rem;
+}
+
+#Doc h3 {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+#Doc .command {
+    background-color: white;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+#Doc .command h2 {
+    margin-top: 0;
+}
+
+#Doc .method {
+    font-weight: bold;
+    display: inline-block;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    color: white;
+    font-size: 0.9rem;
+    margin-right: 0.5rem;
+}
+
+#Doc .GET { background-color: #4CAF50; }
+#Doc .POST { background-color: #2196F3; }
+#Doc .PUT { background-color: #FF9800; }
+#Doc .DELETE { background-color: #f44336; }
+
+#Doc code {
+    background-color: #eee;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.95rem;
+}
+
+#Doc .navbar {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    background-color: #ffffff;
+    padding: 1rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    margin-bottom: 2rem;
+}
+
+#Doc .navbar a {
+    text-decoration: none;
+    color: #333;
+    font-weight: bold;
+}
+
+#Doc .navbar a:hover {
+    color: #2196F3;
+}
+
+#Doc .section-title {
+    margin-top: 3rem;
+    margin-bottom: 1rem;
+    font-size: 1.5rem;
+    color: #444;
+    border-bottom: 2px solid #ddd;
+    padding-bottom: 0.5rem;
+}
