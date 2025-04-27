@@ -154,9 +154,10 @@ document.getElementById('guessForm').addEventListener('submit', function(e) {
 });
 
 const timerDisplay = document.getElementById('timer');
+
 const timerInterval = setInterval(function() {
     timeRemaining--;
-    timerDisplay.innerHTML = `⏳ Temps restant : <strong>${timeRemaining}</strong> secondes`;        
+    timerDisplay.innerHTML = `⏳ Temps restant : <b>${timeRemaining}</b> secondes`;        
 
     // Fin du temps
     if (timeRemaining <= 0) {

@@ -75,7 +75,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (data.success) {
             const points = data.gainedPoints || 0;
             const scoreText = data.isConnected
-                ? `Vous avez gagné <strong>${points}</strong> points. Score total : <b>${data.updatedScore}</b> pts.`
+                ? `Vous avez gagné <b>${points}</b> points. Score total : <b>${data.updatedScore}</b> pts.`
                 : `<b>${points}</b> points potentiels (non enregistrés car non connecté).`;    
             resultContainer.innerHTML = `
                 <p>${scoreText}</p>

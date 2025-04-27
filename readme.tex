@@ -37,32 +37,33 @@
 Karl-Antoine Plouffe (20218864) \newline
 
 \section{Répartition des tâches}
-\bgroup
 \begin{table}[htbp]
 \centering
     \setlength{\leftmargini}{0.5cm}
-    \begin{tabular}{| m{5cm} | m{5cm} |}
+    \begin{tabular}{| p{5cm} | p{5cm} |}
         \hline
         Yanis Boulogne & Karl-Antoine Plouffe \\
         \hline
         \begin{itemize} 
-            \item Chemin d'api back-end
+            \item Chemins d'api back-end
             \item Faire un sequelize maison
+            \item Style de la documentation
         \end{itemize} & 
         \begin{itemize} 
             \item Implémentation de la section D- Page Web 
             \item REST relatif à l'application one-page
-            \item Style de l'application
+            \item Style de l'application de jeu
         \end{itemize} \\
         \hline
     \end{tabular}
 \end{table}
-\egroup
 
 \section{Page HTML abritée au DIRO}
 L'application n'a pas de page HTML dédiée, seuls des modèles EJS existent dans le dossier suivant : \\
-\href{https://www-ens.iro.umontreal.ca/hiver/~boulogny/TangoLucioUltimate/src/views/} \\
+\url{https://www-ens.iro.umontreal.ca/hiver/~boulogny/TangoLucioUltimate/src/views/} \\
 Ces modèles permettent de d'afficher dynamiquement l'application one-page dans un navigateur web en utilisant les chemins de la section D en localhost lorsque notre application node.js est lancée.
+
+\newpage
 
 \section{Ressources utilisées}
 \subsection{Langages}
@@ -98,8 +99,5 @@ Ces modèles permettent de d'afficher dynamiquement l'application one-page dans 
 Nous avions commencé le projet en JavaScript et utilisé le module "sequelize" mais à cause des restrictions du DIRO, il était impossible de se connecter à notre base de données. Au bout d'une semaine, nous nous sommes résolus à utiliser du PHP, mais sans tout refaire de 0, ce qui nous a amenés à créer notre propre module sequelize.
 Le fichier db-bridge.php fait exactement cela, les fichiers PHP pouvant communiquer avec les BDD du DIRO, nous avons fait le choix de faire un pont entre toute notre API existante et le DIRO. La manière dont cela fonctionne est plutôt simple, dans chaque modèle que nous avons, nous avons créé des mots-clés qui font appel à database.js pour remettre au propre les appels SQL et le pont PHP renvoie le résultat en format JSON exploitable par le reste de l'API.
 
-\subsection{Express}
-La version 5 d'Express était utilisée au départ, mais elle pausait problème pour la gestion de des "?" dans les chemins ("/word/:lg?/:time?/:hint?")
-
-
+\subsection{...}
 \end{document}
