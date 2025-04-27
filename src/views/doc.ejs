@@ -12,24 +12,24 @@
   <section id="user">
     <h2 class="mt-5">Joueur</h2>
     <div class="command">
-      <h2><span class="method GET">GET</span> &lt;path&gt;#/gamers/all</h2>
+      <h4><span class="method GET">GET</span> &lt;path&gt;#/gamers/all</h4>
       <p>Récupère la liste de tous les joueurs enregistrés dans la base de données.</p>
     </div>
     <div class="command">
-      <h2><span class="method GET">GET</span> &lt;path&gt;#/gamers/:joueur</h2>
+      <h4><span class="method GET">GET</span> &lt;path&gt;#/gamers/:joueur</h4>
       <p>Récupère les informations d'un joueur spécifique par son pseudo.</p>
     </div>
     <div class="command">
-      <h2><span class="method POST">POST</span> &lt;path&gt;#/gamers/add/:pseudo/:pwd</h2>
+      <h4><span class="method POST">POST</span> &lt;path&gt;#/gamers/add/:pseudo/:pwd</h4>
       <p>Crée un nouveau joueur avec le pseudo et mot de passe fournis.</p>
       <p>Le mot de passe sera chiffré avant d'être stocké.</p>
     </div>
     <div class="command">
-      <h2><span class="method GET">GET</span> &lt;path&gt;#/gamers/login/:pseudo/:pwd</h2>
+      <h4><span class="method GET">GET</span> &lt;path&gt;#/gamers/login/:pseudo/:pwd</h4>
       <p>Permet la connexion d'un joueur avec vérification du mot de passe.</p>
     </div>
     <div class="command">
-      <h2><span class="method GET">GET</span> &lt;path&gt;#/gamers/logout/:pseudo/:pwd</h2>
+      <h4><span class="method GET">GET</span> &lt;path&gt;#/gamers/logout/:pseudo/:pwd</h4>
       <p>Déconnecte un joueur et met à jour sa date de dernière connexion.</p>
     </div>
   </section>
@@ -37,87 +37,87 @@
   <section id="word">
     <h2 class="mt-5">Mot</h2>
     <div class="command">
-      <h2><span class="method GET">GET</span> &lt;path&gt;#/word</h2>
+      <h4><span class="method GET">GET</span> &lt;path&gt;#/word</h4>
       <p>Récupère les 10 premiers mots à partir de l'ID 1 avec leurs définitions.</p>
     </div>    
     <div class="command">
-      <h2><span class="method GET">GET</span> &lt;path&gt;#/word/:nb</h2>
+      <h4><span class="method GET">GET</span> &lt;path&gt;#/word/:nb</h4>
       <p>Récupère un nombre spécifique de mots à partir de l'ID 1 avec leurs définitions.</p>
     </div>    
     <div class="command">
-      <h2><span class="method GET">GET</span> &lt;path&gt;#/word/:nb/:from</h2>
+      <h4><span class="method GET">GET</span> &lt;path&gt;#/word/:nb/:from</h4>
       <p>Récupère un nombre spécifique de mots à partir d'un ID donné avec leurs définitions.</p>
     </div>    
     <div class="command">
-      <h2><span class="method GET">GET</span> &lt;path&gt;#/word/add?lien=[url]</h2>
+      <h4><span class="method GET">GET</span> &lt;path&gt;#/word/add?lien=[url]</h4>
       <p>Importe des mots et définitions à partir d'un fichier en ligne.</p>
       <p>Le fichier doit contenir une ligne par mot avec le format: langue source mot définition.</p>
     </div>
   </section>
 
   <section id="admin">
-    <h2 class="section-title">Admin</h2>
+    <h2 class="mt-5">Admin</h2>
     <div class="command">
-      <h2><span class="method GET">GET</span> &lt;path&gt;#/admin/ping</h2>
+      <h4><span class="method GET">GET</span> &lt;path&gt;#/admin/ping</h4>
       <p>Vérifie la disponibilité du service.</p>
     </div>
 
     <div class="command">
-      <h2><span class="method GET">GET</span> &lt;path&gt;#/admin/top</h2>
+      <h4><span class="method GET">GET</span> &lt;path&gt;#/admin/top</h4>
       <p>Récupère les 10 meilleurs joueurs classés par score.</p>
     </div>
 
     <div class="command">
-      <h2><span class="method GET">GET</span> &lt;path&gt;#/admin/top/:nb</h2>
+      <h4><span class="method GET">GET</span> &lt;path&gt;#/admin/top/:nb</h4>
       <p>Récupère les N meilleurs joueurs classés par score.</p>
     </div>
 
     <div class="command">
-      <h2><span class="method DELETE">DELETE</span> &lt;path&gt;#/admin/delete/joueur/:joueur</h2>
+      <h4><span class="method DELETE">DELETE</span> &lt;path&gt;#/admin/delete/joueur/:joueur</h4>
       <p>Supprime un joueur spécifique de la base de données.</p>
     </div>
 
     <div class="command">
-      <h2><span class="method DELETE">DELETE</span> &lt;path&gt;#/admin/delete/def/:id</h2>
+      <h4><span class="method DELETE">DELETE</span> &lt;path&gt;#/admin/delete/def/:id</h4>
       <p>Supprime une définition spécifique par son ID.</p>
     </div>
 
     <div class="command">
-      <h2><span class="method POST">POST</span> &lt;path&gt;#/admin/add/:word/:lang</h2>
+      <h4><span class="method POST">POST</span> &lt;path&gt;#/admin/add/:word/:lang</h4>
       <p>Ajoute un nouveau mot dans la langue spécifiée.</p>
     </div>
 
     <div class="command">
-      <h2><span class="method POST">POST</span> &lt;path&gt;#/admin/add/:word/:lang/:def</h2>
+      <h4><span class="method POST">POST</span> &lt;path&gt;#/admin/add/:word/:lang/:def</h4>
       <p>Ajoute une définition à un mot existant.</p>
     </div>
   </section>
     
   <section id="game">
-    <h2>Jeu</h2>
+    <h2  class="mt-5 section-title">Jeu</h2>
     <div>
-      <h2><span>GET</span>&lt;path&gt;#/jeu/word/[/&lt;lg&gt;[/&lt;time&gt;[/&lt;hint&gt;]]]</h2>
+      <h4><span>GET</span>&lt;path&gt;#/jeu/word/[/&lt;lg&gt;[/&lt;time&gt;[/&lt;hint&gt;]]]</h4>
       <p>Retourne une page HTML qui permet à un joueur de deviner en temps limité le mot correspondant à une définition affichée pour un mot choisi aléatoirement dans la collection.</p>
     </div>
     <div>
-      <h2><span>GET</span>&lt;path&gt;#/jeu/def/[/&lt;lg&gt;[/&lt;time&gt;]]</h2>
+      <h4><span>GET</span>&lt;path&gt;#/jeu/def/[/&lt;lg&gt;[/&lt;time&gt;]]</h4>
       <p>Sélectionne un mot aléatoirement de la langue. Affiche ce mot. Demande au joueur de saisir des définitions qui seront ajoutées pour ce mot dans la
         base de données.</p>
     </div>
   </section>
 
   <section id="dump">
-    <h2 class="section-title">Dump</h2>
+    <h2 class="mt-5 section-title">Dump</h2>
     <div class="command">
-      <h2><span class="method GET">GET</span> &lt;path&gt;#/dump/&lt;step&gt;</h2>
+      <h4><span class="method GET">GET</span> &lt;path&gt;#/dump/&lt;step&gt;</h4>
       <p>Affiche les définitions de la collection.</p>
     </div>
   </section>
   
   <section id="doc">
-    <h2 class="section-title">Doc</h2>
+    <h2 class="mt-5 section-title">Doc</h2>
     <div class="command">
-      <h2><span class="method GET">GET</span> &lt;path&gt;#/doc</h2>
+      <h4><span class="method GET">GET</span> &lt;path&gt;#/doc</h4>
       <p>Vous êtes ici! Offre une page HTML d´ecrivant les services REST disponibles
         ainsi que les routes de l’application client.</p>
     </div>
