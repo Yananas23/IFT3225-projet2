@@ -157,7 +157,7 @@ async function testConnection() {
   try {
     await sequelize.authenticate();
     console.log("✅ Connexion à MySQL réussie via le pont PHP !");
-    console.log(`Base de données: ${process.env.DB_NAME}`);
+    console.log(`Base de données: ${process.env.DB_USER}_${process.env.DB_NAME}`);
   } catch (error) {
     console.error("❌ Erreur de connexion :", error);
   }
