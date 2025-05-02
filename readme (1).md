@@ -1,0 +1,93 @@
+# 🎮 TangoLucioUltimate
+
+![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)
+![Node](https://img.shields.io/badge/Node.js-v16+-green.svg)
+![Licence](https://img.shields.io/badge/licence-MIT-lightgrey.svg)
+
+> Une application web de jeux interactifs développée dans le cadre du cours IFT3225 - Technologies web à l'Université de Montréal.
+
+## ✨ Aperçu
+
+TangoLucioUltimate est une application web permettant aux utilisateurs de jouer à des jeux en ligne. Les utilisateurs peuvent s'authentifier pour enregistrer leurs scores ou jouer en tant qu'invités anonymes. Le projet démontre l'utilisation de technologies web modernes pour créer une interface utilisateur dynamique et interactive.
+
+## 👥 Équipe
+
+| ![](https://github.com/Yananas23.png?size=100) | ![](https://github.com/KarlAntoine.png?size=100) |
+|:---------------------------------------------:|:-----------------------------------------------:|
+| **Yanis Boulogne** | **Karl-Antoine Plouffe** |
+| 20316250 | 20218864 |
+| Backend & API | Frontend & UX |
+| Sequelize maison | Application one-page |
+
+## 🚀 Installation & Démarrage
+
+```bash
+# Cloner le dépôt
+git clone https://github.com/Yananas23/IFT3225-projet2.git
+cd IFT3225-projet2
+
+# Installer les dépendances
+npm install
+
+# Lancer l'application (retourne un PID pour l'arrêt)
+node server.js &
+
+# Pour arrêter l'application
+kill {pid}
+```
+
+## 🔧 Technologies
+
+### Langages
+- JavaScript
+- HTML/CSS
+- PHP
+- SQL
+
+### Frontend
+- Bootstrap 5.3.3
+- DataTables 2.2.2
+- EJS 3.1.10 (templating)
+
+### Backend
+- Node.js & Express 4.21.2
+- express-session 1.18.1
+- express-ejs-layouts 2.5.1
+- Bcrypt (hachage de mots de passe)
+- Axios (requêtes HTTP)
+- CORS (partage de ressources entre domaines)
+- MySQL2 (connexion à la base de données)
+
+## 📂 Structure du projet
+
+Les templates EJS de l'application sont disponibles ici:
+```
+https://www-ens.iro.umontreal.ca/hiver/~boulogny/TangoLucioUltimate/src/views/
+```
+
+## ✅ Fonctionnalités
+
+- **Authentification des utilisateurs**: Création de compte et connexion
+- **Mode anonyme**: Permet de jouer sans compte
+- **Enregistrement des scores**: Sauvegarde des performances pour les utilisateurs connectés
+- **Interface responsive**: Adaptée à différentes tailles d'écran
+
+## 🔍 Points techniques notables
+
+### 🔗 "Sequelize" maison & connexion BDD
+
+En raison des restrictions du DIRO concernant les connexions aux bases de données, nous avons développé une solution alternative:
+
+- Fichier `db-bridge.php` agissant comme intermédiaire
+- Communication entre JavaScript et PHP pour accéder à la BDD
+- Résultats renvoyés en JSON facilement exploitable par l'API
+
+### 👤 Gestion des joueurs anonymes
+
+Tous les utilisateurs peuvent jouer aux jeux proposés:
+- Les utilisateurs authentifiés voient leurs scores sauvegardés
+- Les joueurs anonymes peuvent profiter des jeux sans enregistrement de score
+
+## 📝 Notes
+
+L'application utilise des modèles EJS plutôt que des pages HTML statiques, ce qui permet d'afficher dynamiquement l'application sous forme de page unique (one-page) lorsque l'application Node.js est lancée.
